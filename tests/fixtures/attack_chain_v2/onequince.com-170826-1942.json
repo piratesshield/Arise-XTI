@@ -1,0 +1,214 @@
+{
+  "scan_id": "onequince.com-170826-1942",
+  "capec_v1": {
+    "capec_attack_paths.json": {
+      "generated_at": "2026-08-17T18:25:05.832907+00:00",
+      "scan_dir": "/Users/apple/Downloads/ARISEv4 2/scans/onequince.com-170826-1942",
+      "capec_version": "3.9",
+      "capec_patterns_loaded": 559,
+      "precede_edges": 172,
+      "findings_total": 0,
+      "findings_mapped": 0,
+      "asset_facts": {
+        "hosts": [
+          "admin.onequince.com",
+          "api-dev.onequince.com",
+          "api-integ.onequince.com",
+          "api-prod-public.onequince.com",
+          "api-qa.onequince.com",
+          "checkout-dev.onequince.com",
+          "checkout-test.onequince.com",
+          "checkout.onequince.com",
+          "engineering.onequince.com",
+          "enterpriseenrollment.onequince.com",
+          "go.onequince.com",
+          "images.onequince.com",
+          "pre-integ.onequince.com",
+          "static.capig.onequince.com",
+          "storefront-bff-prod.onequince.com",
+          "stream.onequince.com"
+        ],
+        "techs": [
+          "amazon cloudfront",
+          "amazon elb",
+          "amazon s3",
+          "amazon web services",
+          "azure",
+          "azure front door",
+          "cloudflare",
+          "express",
+          "hsts",
+          "http/3",
+          "nginx",
+          "node.js"
+        ],
+        "has_api": true,
+        "has_auth_finding": true,
+        "cloud": true,
+        "services": []
+      },
+      "kg_summary": {
+        "node_counts": {
+          "target": 1
+        },
+        "edge_count": 0
+      },
+      "cloud_seeds_present": [
+        "federation_present",
+        "mail_provider"
+      ],
+      "cloud_paths_count": 3,
+      "paths": [
+        {
+          "id": "cloud-golden-saml",
+          "kind": "cloud",
+          "score": 93,
+          "realized": true,
+          "narrative": "ADFS token-signing cert \u2192 Golden SAML \u2192 impersonate \u2192 bypass MFA \u2014 compromise ADFS / AAD-Connect sync account \u2192 steal token-signing certificate \u2192 forge SAML tokens for any user \u2192 access federated cloud services, bypassing MFA",
+          "steps": [
+            "compromise ADFS / AAD-Connect sync account",
+            "steal token-signing certificate",
+            "forge SAML tokens for any user",
+            "access federated cloud services, bypassing MFA"
+          ],
+          "entry_seed": [
+            "federation_present"
+          ],
+          "evidence": "Federation host auth.onequince.com live (Federation host live \u2014 likely ADFS/STS (Golden-SAML + AAD-Connect prerequisite; see cloud attack paths)).",
+          "capec": [
+            "CAPEC-21",
+            "CAPEC-473"
+          ],
+          "mitre": [
+            "T1606.002",
+            "T1199"
+          ],
+          "terminal_impact": [
+            "Gain Privileges",
+            "Bypass Protection Mechanism"
+          ],
+          "note": "confirmed entry finding present"
+        },
+        {
+          "id": "cloud-onprem-pivot",
+          "kind": "cloud",
+          "score": 83,
+          "realized": true,
+          "narrative": "Cloud \u2192 on-prem pivot (VPN / Service Bus / Logic Apps / Hybrid Worker) \u2014 leverage cloud foothold's hybrid connectivity \u2192 reach internal services via VPN gateway / Service Bus relay / Logic Apps / Hybrid Runbook Worker \u2192 re-enter on-prem network ('circle of access')",
+          "steps": [
+            "leverage cloud foothold's hybrid connectivity",
+            "reach internal services via VPN gateway / Service Bus relay / Logic Apps / Hybrid Runbook Worker",
+            "re-enter on-prem network ('circle of access')"
+          ],
+          "entry_seed": [
+            "federation_present"
+          ],
+          "evidence": "Federation host auth.onequince.com live (Federation host live \u2014 likely ADFS/STS (Golden-SAML + AAD-Connect prerequisite; see cloud attack paths)).",
+          "capec": [
+            "CAPEC-107"
+          ],
+          "mitre": [
+            "T1090",
+            "T1021"
+          ],
+          "terminal_impact": [
+            "Execute Unauthorized Commands",
+            "Read Data"
+          ],
+          "note": "confirmed entry finding present"
+        },
+        {
+          "id": "cloud-password-spray",
+          "kind": "cloud",
+          "score": 65,
+          "realized": true,
+          "narrative": "Password spray (low-and-slow) \u2192 cloud / VPN initial access \u2014 enumerate valid users from OSINT/SaaS footprint \u2192 low-and-slow spray common passwords against cloud auth \u2192 obtain a valid session, bypass lockout",
+          "steps": [
+            "enumerate valid users from OSINT/SaaS footprint",
+            "low-and-slow spray common passwords against cloud auth",
+            "obtain a valid session, bypass lockout"
+          ],
+          "entry_seed": [
+            "federation_present",
+            "mail_provider"
+          ],
+          "evidence": "Federation host auth.onequince.com live (Federation host live \u2014 likely ADFS/STS (Golden-SAML + AAD-Connect prerequisite; see cloud attack paths)).; mail provider: google",
+          "capec": [
+            "CAPEC-49",
+            "CAPEC-565"
+          ],
+          "mitre": [
+            "T1110.003",
+            "T1078.004"
+          ],
+          "terminal_impact": [
+            "Gain Privileges"
+          ],
+          "note": "confirmed entry finding present"
+        }
+      ]
+    },
+    "capec_kg.json": {
+      "nodes": [
+        {
+          "type": "target",
+          "label": "admin.onequince.com,api-dev.onequince.com,api-integ.onequinc",
+          "attrs": {}
+        }
+      ],
+      "edges": [],
+      "summary": {
+        "node_counts": {
+          "target": 1
+        },
+        "edge_count": 0
+      }
+    }
+  },
+  "report": {
+    "path_count": 0,
+    "path_ids": [],
+    "path_severities": {},
+    "entry_point_count": 15,
+    "entry_point_hosts": [
+      "api-dev.onequince.com",
+      "enterpriseregistration.onequince.com",
+      "checkout-dev.onequince.com",
+      "checkout-test.onequince.com",
+      "ts.onequince.com",
+      "capig.onequince.com",
+      "checkout.onequince.com",
+      "images.onequince.com",
+      "pre-integ.onequince.com",
+      "static.capig.onequince.com",
+      "admin.onequince.com",
+      "api-integ.onequince.com",
+      "engineering.onequince.com",
+      "api-qa.onequince.com",
+      "api-prod-public.onequince.com"
+    ],
+    "org_score": null,
+    "grade": null
+  },
+  "kaiju": {
+    "entity_count": 274,
+    "relation_count": 354,
+    "issue_count": 121,
+    "issues_by_rule": {
+      "dev-staging-exposed": 4,
+      "missing-headers": 55,
+      "hsts-gap": 8,
+      "no-waf": 47,
+      "compounding-risk": 7
+    },
+    "compounding_risk_hosts": [
+      "issue:29862043555e",
+      "issue:3cc46c886640",
+      "issue:ca18a53a93fb",
+      "issue:9d5f948d9578",
+      "issue:a5e68254ec56",
+      "issue:a7eea3d56194",
+      "issue:abbec13d4ef4"
+    ]
+  }
+}

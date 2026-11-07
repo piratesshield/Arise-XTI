@@ -1,0 +1,51 @@
+# ── ARISE Docker build-context excludes ──────────────────────────────────────
+# CRITICAL: keep scan data (tens of GB) and all secrets OUT of the image + context.
+
+# Scan data / outputs (20+ GB) — mount as a volume at runtime instead
+scans/
+outputs/
+logs/
+jobs/
+state/
+
+# Secrets & per-install identity — NEVER bake into an image
+.env
+.env.*
+*.key
+.arise_master.key
+arise_session.key
+users.json
+secrets.enc.json
+.arise_kev_cache.json
+
+# VCS / editor / OS
+.git/
+.gitignore
+.claude/
+.agents/
+.DS_Store
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Local Python / node envs
+venv/
+.venv/
+env/
+node_modules/
+
+# Docs, design assets, scratch — not needed at runtime
+dash-exam/
+*.fig
+*.png
+*.jpg
+*.jpeg
+*.md
+*.backups.py
+old_filter.txt
+test_filter.js
+filter_manager.js
+qq1.png
+
+# The build artifacts themselves
+docker/*.tar

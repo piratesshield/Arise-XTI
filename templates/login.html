@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARISE — Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+    :root {
+        --bg: #0B0F14; --surface: #151B23; --surface-2: #101720;
+        --border: #263241; --text: #F8FAFC; --text-dim: #CBD5E1; --text-faint: #94A3B8;
+        --accent: #2563EB; --accent-hover: #1D4ED8; --accent-focus: #60A5FA;
+        --crit: #F87171; --radius: 10px;
+        --font: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: var(--font); color: var(--text);
+        background: var(--bg);
+        min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: rgba(37,99,235,.3); color: #fff; }
+    .card {
+        width: 380px; background: var(--surface); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 36px 32px;
+        box-shadow: 0 16px 48px rgba(0,0,0,.30);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+    .brand .logo {
+        width: 38px; height: 38px; border-radius: 10px; background: var(--accent);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 17px; color: #fff; letter-spacing: -0.5px;
+        box-shadow: none;
+    }
+    .brand h1 { font-family: var(--mono); font-size: 18px; font-weight: 600; letter-spacing: 4px; }
+    .sub { color: var(--text-dim); font-size: 13px; margin-bottom: 24px; line-height: 1.4; }
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--text-dim); margin: 16px 0 6px; letter-spacing: .3px; text-transform: uppercase; }
+    input {
+        width: 100%; padding: 12px 14px; background: var(--surface-2); color: var(--text);
+        border: 1px solid var(--border); border-radius: 10px; font-size: 14px; outline: none;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.22); }
+    button {
+        width: 100%; margin-top: 22px; padding: 13px; border: 0; border-radius: 10px;
+        background: var(--accent); color: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
+        box-shadow: none;
+        transition: filter .15s, transform .12s;
+    }
+    button:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+    button:active:not(:disabled) { transform: translateY(0); }
+    button:disabled { opacity: .55; cursor: default; }
+    .err {
+        display: none; margin-top: 14px; padding: 10px 14px; border-radius: 10px;
+        background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3);
+        color: var(--crit); font-size: 13px;
+    }
+    .foot { margin-top: 20px; font-size: 11px; color: var(--text-faint); text-align: center; letter-spacing: .2px; }
+    .version { margin-top: 8px; font-size: 10px; color: var(--text-faint); text-align: center; opacity: .5; }
+</style>
+</head>
+<body>
+<form class="card" id="loginForm">
+    <div class="brand"><div class="logo"><svg width="20" height="20" viewBox="0 0 18 18" fill="none"><path d="M9 1.5L15.5 5.25V12.75L9 16.5L2.5 12.75V5.25L9 1.5Z" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 5.5L12 7.25V10.75L9 12.5L6 10.75V7.25L9 5.5Z" fill="#fff" opacity="0.6"/></svg></div><h1>ARISE</h1></div>
+    <div class="sub">Summon every hidden exposure — sign in to continue</div>
+
+    <label for="username">Username</label>
+    <input id="username" name="username" autocomplete="username" autofocus required placeholder="admin">
+
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">
+
+    <button type="submit" id="submitBtn">Sign in</button>
+    <div class="err" id="err"></div>
+    <div class="foot">SSO / SAML / Google sign-in coming soon</div>
+    <div class="version">ARISE EASM v4.0</div>
+</form>
+<script>
+    const params = new URLSearchParams(location.search);
+    const nextUrl = params.get('next') || '/';
+    const form = document.getElementById('loginForm');
+    const btn = document.getElementById('submitBtn');
+    const err = document.getElementById('err');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        err.style.display = 'none';
+        btn.disabled = true; btn.textContent = 'Signing in…';
+        try {
+            const r = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value,
+                }),
+            });
+            const data = await r.json();
+            if (r.ok) { location.href = nextUrl; return; }
+            err.textContent = data.error || 'Sign in failed.';
+            err.style.display = 'block';
+        } catch (_) {
+            err.textContent = 'Network error — is the dashboard running?';
+            err.style.display = 'block';
+        }
+        btn.disabled = false; btn.textContent = 'Sign in';
+    });
+</script>
+</body>
+</html>

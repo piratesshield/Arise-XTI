@@ -1,0 +1,951 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ r.meta.target }} — Attack Surface Report</title>
+<style>
+:root{
+  --bg:#F8FAFC; --surface:#FFFFFF; --surface-alt:#F8FAFC; --border:#E2E8F0; --border-strong:#CBD5E1;
+  --text:#0F172A; --text-2:#475569; --text-muted:#64748B;
+  --accent:#2563EB; --accent-2:#0EA5E9; --accent-soft:#EFF6FF;
+  --critical:#DC2626; --critical-bg:#FEF2F2;
+  --high:#EA580C;    --high-bg:#FFF7ED;
+  --medium:#D97706;  --medium-bg:#FEFCE8;
+  --low:#16A34A;     --low-bg:#F0FDF4;
+  --info:#2563EB;    --info-bg:#EFF6FF;
+  --neutral:#64748B; --neutral-bg:#F1F5F9;
+  --ink:#0B0F14; --ink-2:#0F141B;
+  --radius:8px; --shadow:0 1px 3px rgba(15,23,42,.06), 0 0 0 1px rgba(15,23,42,.03);
+  --font:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;
+  --mono:'IBM Plex Mono',SFMono-Regular,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);font-size:13px;line-height:1.45;color:var(--text);background:var(--bg)}
+.sheet{max-width:1100px;margin:0 auto;padding:0 0 60px}
+
+/* ---- screen-only toolbar ---- */
+.toolbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;
+  padding:10px 20px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border)}
+.toolbar .t-title{font-weight:700;font-size:13px}
+.toolbar .t-sub{color:var(--text-muted);font-size:12px}
+.toolbar .sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:var(--radius);
+  border:1px solid var(--border-strong);background:#fff;color:var(--text);font:600 12.5px var(--font);
+  cursor:pointer}
+.btn:hover{background:var(--surface-alt)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:#0b7f75}
+
+/* ---- cover ---- */
+.cover{background:
+    radial-gradient(ellipse 800px 400px at 80% 0%,rgba(37,99,235,.08) 0%,transparent 65%),
+    var(--ink);
+  color:#f8fafc;padding:52px 48px 40px;border-radius:10px;margin:20px 0 26px;position:relative;overflow:hidden}
+.cover-brand{display:flex;align-items:center;gap:12px;margin-bottom:38px}
+.cover-logo{width:40px;height:40px;border-radius:10px;background:#2563EB;
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:19px;color:#fff}
+.cover-brand .n{font-weight:800;font-size:16px;letter-spacing:.3px}
+.cover-brand .s{font-size:11px;color:#94a3b8}
+.cover h1{font-size:34px;font-weight:800;letter-spacing:-.6px;line-height:1.15;margin-bottom:8px}
+.cover .target{font:600 15px var(--mono);color:#60A5FA;margin-bottom:30px}
+.cover-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
+.cover-cell .k{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#94a3b8;margin-bottom:5px}
+.cover-cell .v{font-size:15px;font-weight:700}
+.cover-cell .v.mono{font-family:var(--mono);font-size:13px;font-weight:600}
+.cover-risk{display:flex;align-items:center;gap:26px;padding:20px 22px;border-radius:8px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+.risk-num{font-size:44px;font-weight:800;line-height:1}
+.risk-num .d{font-size:16px;color:#94a3b8;font-weight:600}
+.risk-meta .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#94a3b8}
+.risk-meta .val{font-size:13px;font-weight:600;margin-top:3px}
+.cover-class{position:absolute;top:0;right:0;padding:6px 16px;background:rgba(198,40,40,.9);
+  font-size:10px;font-weight:800;letter-spacing:1px;border-bottom-left-radius:8px}
+
+/* ---- sections ---- */
+section{margin-bottom:26px}
+.sec-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;padding-bottom:8px;
+  border-bottom:2px solid var(--text)}
+.sec-num{font:800 11px var(--mono);color:var(--accent)}
+.sec-head h2{font-size:17px;font-weight:800;letter-spacing:-.2px}
+.sec-head .hint{margin-left:auto;font-size:11.5px;color:var(--text-muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow)}
+.card-pad{padding:16px 18px}
+h3.sub{font-size:13px;font-weight:700;margin-bottom:10px}
+p.lead{font-size:13.5px;line-height:1.6;color:var(--text)}
+p.lead + p.lead{margin-top:9px}
+
+/* ---- stat tiles ---- */
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px 12px}
+.tile .k{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:4px}
+.tile .v{font-size:21px;font-weight:800;line-height:1.1}
+.tile .x{font-size:10.5px;color:var(--text-muted);margin-top:2px}
+.tile.crit .v{color:var(--critical)} .tile.high .v{color:var(--high)}
+.tile.med .v{color:var(--medium)}   .tile.ok .v{color:var(--low)}
+
+/* ---- pills ---- */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:20px;
+  font-size:10.5px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;white-space:nowrap}
+.pill::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+.pill.critical{color:var(--critical);background:var(--critical-bg)}
+.pill.high{color:var(--high);background:var(--high-bg)}
+.pill.medium{color:var(--medium);background:var(--medium-bg)}
+.pill.low{color:var(--low);background:var(--low-bg)}
+.pill.info{color:var(--info);background:var(--info-bg)}
+.pill.neutral{color:var(--neutral);background:var(--neutral-bg)}
+.tag{display:inline-block;padding:1px 6px;border-radius:4px;background:var(--neutral-bg);
+  color:var(--text-2);font:600 10.5px var(--mono)}
+
+/* ---- attack path ---- */
+.path{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--neutral);
+  border-radius:var(--radius);margin-bottom:14px;box-shadow:var(--shadow);break-inside:avoid}
+.path.critical{border-left-color:var(--critical)}
+.path.high{border-left-color:var(--high)}
+.path.medium{border-left-color:var(--medium)}
+.path.low{border-left-color:var(--low)}
+.path-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;
+  border-bottom:1px solid var(--border);background:var(--surface-alt)}
+.path-id{font:800 11px var(--mono);color:var(--text-2);background:#fff;border:1px solid var(--border);
+  padding:2px 7px;border-radius:4px}
+.path-head h3{font-size:14.5px;font-weight:700;flex:1;min-width:200px}
+.path-chain{padding:7px 16px;font:600 10.5px var(--mono);color:var(--accent-2);
+  background:#f5f5ff;border-bottom:1px solid var(--border)}
+.path-body{padding:14px 16px}
+.premise{font-size:12.5px;line-height:1.55;color:var(--text);padding:10px 12px;background:var(--accent-soft);
+  border-radius:5px;margin-bottom:14px}
+.kv{display:flex;gap:18px;margin-bottom:12px;flex-wrap:wrap}
+.kv div{font-size:11px;color:var(--text-muted)}
+.kv div b{display:block;font-size:12px;color:var(--text);text-transform:capitalize;margin-top:1px}
+
+/* kill-chain timeline */
+.chain{list-style:none;margin:0 0 14px;padding:0;position:relative}
+.chain::before{content:"";position:absolute;left:11px;top:8px;bottom:8px;width:2px;background:var(--border)}
+.chain li{position:relative;padding:0 0 13px 32px}
+.chain li:last-child{padding-bottom:0}
+.step-n{position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;
+  background:var(--surface);border:2px solid var(--accent);color:var(--accent);
+  font:800 10px var(--font);display:flex;align-items:center;justify-content:center}
+.step-phase{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--accent-2)}
+.step-tech{font:600 10.5px var(--mono);color:var(--text-muted);margin:1px 0 4px}
+.step-act{font-size:12.5px;line-height:1.5}
+.step-obs{font-size:11.5px;line-height:1.45;color:var(--text-2);margin-top:3px;
+  padding-left:8px;border-left:2px solid var(--border)}
+.step-obs::before{content:"Observed: ";font-weight:700;color:var(--text-muted)}
+
+.blk{margin-top:12px}
+.blk h4{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  color:var(--text-muted);margin-bottom:6px}
+ul.ev{list-style:none;margin:0;padding:0}
+ul.ev li{font:11.5px/1.5 var(--mono);color:var(--text-2);padding:3px 0 3px 14px;position:relative;
+  word-break:break-word}
+ul.ev li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+ul.fix{list-style:none;margin:0;padding:0}
+ul.fix li{font-size:12px;line-height:1.5;padding:3px 0 3px 18px;position:relative}
+ul.fix li::before{content:"";position:absolute;left:2px;top:8px;width:8px;height:8px;border-radius:2px;
+  border:1.5px solid var(--low)}
+
+/* ---- entry points ---- */
+.ep{display:flex;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);break-inside:avoid}
+.ep:last-child{border-bottom:0}
+.ep-rank{font:800 13px var(--mono);color:var(--text-muted);width:22px;flex:none;text-align:right}
+.ep-main{flex:1;min-width:0}
+.ep-host{font:700 12.5px var(--mono);color:var(--text);word-break:break-all}
+.ep-meta{font-size:11px;color:var(--text-muted);margin:2px 0 5px}
+.ep-meta .sep{margin:0 5px;color:var(--border-strong)}
+ul.why{list-style:none;margin:0;padding:0}
+ul.why li{font-size:11.5px;line-height:1.45;color:var(--text-2);padding:1.5px 0 1.5px 13px;position:relative}
+ul.why li::before{content:"·";position:absolute;left:3px;font-weight:800;color:var(--high)}
+.ep-score{flex:none;text-align:right;width:56px}
+.ep-score .n{font-size:17px;font-weight:800;line-height:1}
+.ep-score .l{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted)}
+
+/* ---- tables ---- */
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{text-align:left;padding:7px 10px;background:var(--surface-alt);border-bottom:1px solid var(--border-strong);
+  font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text-2);white-space:nowrap}
+tbody td{padding:6px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+tbody tr:nth-child(even){background:var(--surface-alt)}
+td.mono,th.num{font-family:var(--mono);font-size:11.5px}
+th.num,td.num{text-align:right}
+/* break-anywhere: for machine strings with no spaces (hostnames, URLs) */
+.wrap{overflow-wrap:anywhere}
+/* soft: wrap on word boundaries only, so "CLOUDFRONT" is never split */
+.soft{overflow-wrap:normal;word-break:keep-all;hyphens:none}
+
+/* ---- bars ---- */
+.bars{display:grid;gap:5px}
+.bar-row{display:grid;grid-template-columns:110px 1fr 34px;align-items:center;gap:9px;font-size:11.5px}
+.bar-row .lbl{font-family:var(--mono);color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{height:9px;background:var(--neutral-bg);border-radius:5px;overflow:hidden}
+.bar-fill{height:100%;background:var(--accent);border-radius:5px}
+.bar-row .n{text-align:right;font-family:var(--mono);font-weight:700;color:var(--text-2)}
+
+/* ---- osint group ---- */
+.og{margin-bottom:12px;break-inside:avoid}
+.og-head{display:flex;align-items:center;gap:9px;padding:8px 12px;background:var(--surface-alt);
+  border:1px solid var(--border);border-bottom:0;border-radius:var(--radius) var(--radius) 0 0}
+.og-head h3{font-size:12.5px;font-weight:700;flex:1}
+.og-count{font:700 11px var(--mono);color:var(--text-muted)}
+
+/* ---- Active finding cards (PoC / testing / output) ---- */
+.fnd{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;break-inside:avoid;overflow:hidden}
+.fnd-head{display:flex;align-items:flex-start;gap:9px;padding:9px 12px;background:var(--surface-alt);border-bottom:1px solid var(--border)}
+.fnd-head .t{flex:1}
+.fnd-title{font-size:12.5px;font-weight:700;line-height:1.35}
+.fnd-url{font:11px var(--mono);color:var(--text-muted);word-break:break-all;margin-top:2px}
+.fnd-body{padding:10px 12px}
+.fnd-block{margin-top:9px}
+.fnd-block:first-child{margin-top:0}
+.fnd-block>.lbl{font:700 9.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:11.5px}
+.kv .k{color:var(--text-muted);font-weight:600;white-space:nowrap}
+.kv .v{font-family:var(--mono);color:var(--text-2);word-break:break-word}
+.poc-pre{background:var(--surface-alt);border:1px solid var(--border);border-radius:6px;padding:7px 9px;
+  font:10.5px/1.5 var(--mono);color:var(--text-2);white-space:pre-wrap;word-break:break-word;overflow-x:auto;max-height:260px}
+.poc-pre.hot{border-color:var(--high);color:var(--high)}
+.fnd-impact{font-size:11.5px;color:var(--text-2);line-height:1.5}
+.fnd-fix{font-size:11.5px;color:var(--low);line-height:1.5;margin-top:3px}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;background:var(--surface-alt);border:1px solid var(--border);
+  font:600 10px var(--mono);color:var(--text-muted);margin:2px 3px 0 0}
+.empty{padding:26px;text-align:center;color:var(--text-muted);font-size:12.5px}
+.note{font-size:11.5px;color:var(--text-muted);line-height:1.5;margin-top:8px}
+.foot{margin-top:34px;padding-top:12px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--text-muted);display:flex;gap:14px;flex-wrap:wrap}
+
+/* ---- narrow screens ---- */
+@media (max-width:820px){
+  .tiles{grid-template-columns:repeat(3,1fr)}
+  .cover-grid{grid-template-columns:repeat(2,1fr)}
+  .bar-row{grid-template-columns:90px 1fr 30px}
+}
+
+/* ---- print (authoritative: must follow the width queries to win at page width) ---- */
+@media print{
+  @page{size:A4;margin:13mm 12mm}
+  body{background:#fff;font-size:10.5px}
+  .toolbar{display:none}
+  .sheet{max-width:none;padding:0}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+  /* Cover owns the first sheet end to end. */
+  .cover{margin:0;border-radius:0;padding:24mm 18mm;break-after:page;
+    min-height:265mm;display:flex;flex-direction:column}
+  .cover h1{font-size:30px}
+  .cover-brand{margin-bottom:26mm}
+  .cover-grid{grid-template-columns:repeat(2,1fr);gap:9mm 6mm;margin-bottom:0}
+  .cover-risk{margin-top:auto}
+
+  section{margin-bottom:14px}
+  .sec-head{break-after:avoid}
+  .path,.ep,.og,.tile,tr,.bar-row{break-inside:avoid}
+  .chain li{break-inside:avoid}
+  thead{display:table-header-group}
+  .card{box-shadow:none}
+  .page-break{break-before:page}
+  a{color:inherit;text-decoration:none}
+  .tiles{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+{% if not r %}
+<div class="sheet">
+  <div class="card card-pad" style="margin-top:40px;text-align:center">
+    <h2 style="font-size:16px;margin-bottom:6px">Report unavailable</h2>
+    <p class="note" style="margin:0">{{ error or 'This scan could not be loaded.' }}</p>
+    <p style="margin-top:14px"><button class="btn" onclick="history.back()">← Back to dashboard</button></p>
+  </div>
+</div>
+</body></html>
+{% else %}
+
+<div class="toolbar">
+  <span class="t-title">{{ r.meta.target }} — Attack Surface Report</span>
+  <span class="t-sub">{{ r.meta.generated_at }}</span>
+  <span class="sp"></span>
+  <button class="btn" onclick="history.back()">← Dashboard</button>
+  <button class="btn btn-primary" onclick="window.print()">Save as PDF</button>
+</div>
+
+<div class="sheet">
+
+  <!-- ======================= COVER ======================= -->
+  <div class="cover">
+    <div class="cover-class">{{ r.meta.classification }}</div>
+    <div class="cover-brand">
+      <div class="cover-logo">A</div>
+      <div>
+        <div class="n">ARISE</div>
+        <div class="s">External Attack Surface Management</div>
+      </div>
+    </div>
+
+    <h1>Attack Surface<br>Assessment</h1>
+    <div class="target">{{ r.meta.target }}</div>
+
+    <div class="cover-grid">
+      <div class="cover-cell"><div class="k">Scan ID</div><div class="v mono">{{ r.meta.scan_id }}</div></div>
+      <div class="cover-cell"><div class="k">Scan Started</div>
+        <div class="v mono">{{ r.meta.scan_started[:16].replace('T',' ') if r.meta.scan_started else '—' }}</div></div>
+      <div class="cover-cell"><div class="k">Generated</div><div class="v mono">{{ r.meta.generated_at }}</div></div>
+      <div class="cover-cell"><div class="k">Engine</div><div class="v mono">ARISE {{ r.meta.engine_version }}</div></div>
+    </div>
+
+    <div class="cover-risk">
+      {% if r.summary.blended_score is not none %}
+      <div>
+        <div class="risk-num">{{ r.summary.blended_score }}<span class="d">/100</span></div>
+        <div class="risk-meta" style="margin-top:5px">
+          <div class="lbl">Blended Risk</div>
+          <div class="val">{{ (r.summary.blended_grade or '')|upper }}</div>
+        </div>
+      </div>
+      {% endif %}
+      <div class="risk-meta">
+        <div class="lbl">Attack Paths</div>
+        <div class="val">{{ r.summary.path_counts.total }} viable
+          {%- if r.summary.path_counts.critical %} · {{ r.summary.path_counts.critical }} critical{% endif %}
+          {%- if r.summary.path_counts.high %} · {{ r.summary.path_counts.high }} high{% endif %}</div>
+      </div>
+      {% if r.summary.has_osint %}
+      <div class="risk-meta">
+        <div class="lbl">Passive OSINT</div>
+        <div class="val">{{ r.summary.osint_score if r.summary.osint_score is not none else '—' }}/100
+          {{ (r.summary.osint_grade or '')|upper }}</div>
+      </div>
+      {% endif %}
+      <div class="risk-meta">
+        <div class="lbl">Active Findings</div>
+        <div class="val">{{ r.findings.active|length }}</div>
+      </div>
+      <div class="risk-meta">
+        <div class="lbl">Assets</div>
+        <div class="val">{{ r.surface.total_assets }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= 1. EXEC SUMMARY ======================= -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>Executive Summary</h2></div>
+    <div class="card card-pad">
+      <p class="lead">{{ r.summary.narrative }}</p>
+      {% if r.summary.osint_narrative %}
+      <p class="lead" style="color:var(--text-2)">{{ r.summary.osint_narrative }}</p>
+      {% endif %}
+      <p class="note">Every statement in this report is derived from a signal this scan observed from outside the
+        target estate. No authenticated access, exploitation, or intrusive testing was performed. Absence of a
+        finding is evidence of what was not observed, not proof that it does not exist.</p>
+    </div>
+  </section>
+
+  <!-- ======================= 2. SURFACE ======================= -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>What the Attacker Can See</h2>
+      <span class="hint">The estate as enumerated from the public internet</span></div>
+    <div class="tiles" style="margin-bottom:10px">
+      <div class="tile"><div class="k">Assets</div><div class="v">{{ r.surface.total_assets }}</div>
+        <div class="x">{{ r.surface.resolved }} resolving</div></div>
+      <div class="tile"><div class="k">Internet-facing</div><div class="v">{{ r.surface.internet_facing }}</div>
+        <div class="x">answering HTTP</div></div>
+      <div class="tile {% if r.surface.waf_coverage_pct == 100 %}ok{% elif r.surface.waf_coverage_pct < 80 %}high{% endif %}">
+        <div class="k">WAF Cover</div><div class="v">{{ r.surface.waf_coverage_pct }}%</div>
+        <div class="x">{{ r.surface.waf_uncovered }} uncovered</div></div>
+      <div class="tile {% if r.surface.dangling %}crit{% endif %}"><div class="k">Dangling</div>
+        <div class="v">{{ r.surface.dangling }}</div><div class="x">takeover-capable</div></div>
+      <div class="tile"><div class="k">APIs</div><div class="v">{{ r.surface.apis }}</div>
+        <div class="x">machine surface</div></div>
+      <div class="tile {% if r.surface.secrets %}crit{% endif %}"><div class="k">Secrets</div>
+        <div class="v">{{ r.surface.secrets }}</div><div class="x">leaked material</div></div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="k">Open Ports</div><div class="v">{{ r.surface.open_ports }}</div>
+        <div class="x">across estate</div></div>
+      <div class="tile"><div class="k">CDN Fronted</div><div class="v">{{ r.surface.cdn_fronted }}</div>
+        <div class="x">edge-shielded</div></div>
+      <div class="tile"><div class="k">Storage</div><div class="v">{{ r.surface.buckets }}</div>
+        <div class="x">object stores</div></div>
+      {% if r.summary.has_osint %}
+      <div class="tile"><div class="k">OSINT Signals</div><div class="v">{{ r.surface.osint_total }}</div>
+        <div class="x">passive intel</div></div>
+      {% endif %}
+      <div class="tile {% if r.findings.active_counts.get('critical') %}crit{% endif %}"><div class="k">Active Findings</div>
+        <div class="v">{{ r.findings.active|length }}</div><div class="x">scanner-confirmed</div></div>
+      <div class="tile"><div class="k">Org Score</div><div class="v">{{ r.summary.org_score }}</div>
+        <div class="x">grade {{ r.summary.grade }}</div></div>
+    </div>
+
+    {% if r.surface.top_ports or r.surface.top_tech %}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+      {% if r.surface.top_ports %}
+      <div class="card card-pad">
+        <h3 class="sub">Most-exposed ports</h3>
+        <div class="bars">
+          {% set pmax = r.surface.top_ports[0][1] %}
+          {% for port, n in r.surface.top_ports %}
+          <div class="bar-row">
+            <span class="lbl">{{ port }}</span>
+            <span class="bar-track"><span class="bar-fill" style="width:{{ (n / pmax * 100)|round(0,'floor') }}%"></span></span>
+            <span class="n">{{ n }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% if r.surface.top_tech %}
+      <div class="card card-pad">
+        <h3 class="sub">Technology an attacker can fingerprint</h3>
+        <div class="bars">
+          {% set tmax = r.surface.top_tech[0][1] %}
+          {% for tech, n in r.surface.top_tech %}
+          <div class="bar-row">
+            <span class="lbl" title="{{ tech }}">{{ tech }}</span>
+            <span class="bar-track"><span class="bar-fill" style="width:{{ (n / tmax * 100)|round(0,'floor') }}%"></span></span>
+            <span class="n">{{ n }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ======================= 3. ACTIVE FINDINGS (web application vulnerabilities) ======================= -->
+  <section class="page-break">
+    <div class="sec-head"><span class="sec-num">03</span><h2>Web Application &amp; API Vulnerabilities</h2>
+      <span class="hint">Confirmed by probe — {{ r.findings.appsec_count }} total</span></div>
+    {% if not r.findings.appsec_sections %}
+      <div class="card empty">
+        No web application or API vulnerability was confirmed on this run.
+        {% if r.findings.infra_count %}
+        <div class="note" style="margin-top:6px">{{ r.findings.infra_count }} infrastructure / cloud / DNS
+          exposure finding(s) were recorded — see the next section.</div>
+        {% endif %}
+      </div>
+    {% else %}
+      <p class="note" style="margin:0 0 12px">These are the scanner-confirmed application and API weaknesses — the
+        report's primary findings (API auth/authorization, injection, XSS, request smuggling, leaked secrets,
+        web templates). Each carries its testing detail (how it was exercised), the scanner output (what came
+        back), and — where the tool captured it — a reproducible proof of concept.</p>
+
+      {% for s in r.findings.appsec_sections %}
+      <div class="og" style="break-inside:auto">
+        <div class="og-head">
+          <span class="pill {{ s.worst }}">{{ s.worst }}</span>
+          <h3>{{ s.label }}</h3>
+          <span class="og-count">{{ s.count }} finding{{ 's' if s.count != 1 }}</span>
+        </div>
+        {% if s.blurb %}<div class="note" style="margin:0;padding:6px 12px;border:1px solid var(--border);border-top:0;background:var(--surface)">{{ s.blurb }}</div>{% endif %}
+        <div style="padding:10px 0 2px">
+          {% for f in s.findings[:40] %}
+          <div class="fnd">
+            <div class="fnd-head">
+              <span class="pill {{ f.severity }}">{{ f.severity }}</span>
+              <div class="t">
+                <div class="fnd-title">{{ f.title }}
+                  {% if f.cve %}<span class="tag">{{ f.cve }}</span>{% endif %}
+                  {% if f.cwe %}<span class="tag">{{ f.cwe }}</span>{% endif %}
+                  {% if f.template_id %}<span class="tag">{{ f.template_id }}</span>{% endif %}
+                </div>
+                {% if f.host %}<div class="fnd-url"><b>{{ f.host }}</b></div>{% endif %}
+                {% if f.url %}<div class="fnd-url">{{ f.url }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="fnd-body">
+              {% if f.impact %}<div class="fnd-block"><div class="fnd-impact">{{ f.impact }}</div></div>{% endif %}
+
+              {% if f.testing %}
+              <div class="fnd-block">
+                <div class="lbl">Testing detail</div>
+                <div class="kv">
+                  {% for k, v in f.testing %}<div class="k">{{ k }}</div><div class="v">{{ v }}</div>{% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              {% if f.output %}
+              <div class="fnd-block">
+                <div class="lbl">Scanner output</div>
+                {% for k, v in f.output %}
+                <div class="kv" style="margin-bottom:3px"><div class="k">{{ k }}</div><div class="v">{{ v }}</div></div>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              {% if f.poc.payload %}
+              <div class="fnd-block"><div class="lbl">Proof of concept — payload</div>
+                <pre class="poc-pre hot">{{ f.poc.payload }}</pre></div>
+              {% endif %}
+              {% if f.poc.request %}
+              <div class="fnd-block"><div class="lbl">Proof of concept — request</div>
+                <pre class="poc-pre">{{ f.poc.request }}</pre></div>
+              {% endif %}
+              {% if f.poc.response %}
+              <div class="fnd-block"><div class="lbl">Proof of concept — response</div>
+                <pre class="poc-pre">{{ f.poc.response }}</pre></div>
+              {% endif %}
+              {% if f.poc.curl %}
+              <div class="fnd-block"><div class="lbl">Reproduce</div>
+                <pre class="poc-pre">{{ f.poc.curl }}</pre></div>
+              {% endif %}
+
+              {% if f.tags %}
+              <div class="fnd-block">{% for t in f.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>
+              {% endif %}
+
+              {% if f.remediation %}<div class="fnd-block"><div class="fnd-fix"><b>Fix:</b> {{ f.remediation }}</div></div>{% endif %}
+
+              {% if f.reference %}
+              <div class="fnd-block"><div class="lbl">References</div>
+                {% for ref in f.reference %}<div class="fnd-url">{{ ref }}</div>{% endfor %}</div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+          {% if s.count > 40 %}
+          <div class="note" style="padding:6px 2px">… and {{ s.count - 40 }} more {{ s.label }} finding(s) — see the dashboard for the full list.</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </section>
+
+  <!-- ======================= 4. INFRASTRUCTURE / CLOUD / DNS ======================= -->
+  {% if r.findings.infra_sections %}
+  <section class="page-break">
+    <div class="sec-head"><span class="sec-num">04</span><h2>Infrastructure, Cloud &amp; DNS Exposure</h2>
+      <span class="hint">Confirmed by probe — {{ r.findings.infra_count }} total</span></div>
+      <p class="note" style="margin:0 0 12px">Network- and platform-layer exposure that sits outside the application
+        code itself — object storage, DNS hygiene, subdomain delegation, and cloud-template findings. Same
+        testing/output/PoC detail per finding, grouped by the module that produced them.</p>
+
+      {% for s in r.findings.infra_sections %}
+      <div class="og" style="break-inside:auto">
+        <div class="og-head">
+          <span class="pill {{ s.worst }}">{{ s.worst }}</span>
+          <h3>{{ s.label }}</h3>
+          <span class="og-count">{{ s.count }} finding{{ 's' if s.count != 1 }}</span>
+        </div>
+        {% if s.blurb %}<div class="note" style="margin:0;padding:6px 12px;border:1px solid var(--border);border-top:0;background:var(--surface)">{{ s.blurb }}</div>{% endif %}
+        <div style="padding:10px 0 2px">
+          {% for f in s.findings[:40] %}
+          <div class="fnd">
+            <div class="fnd-head">
+              <span class="pill {{ f.severity }}">{{ f.severity }}</span>
+              <div class="t">
+                <div class="fnd-title">{{ f.title }}
+                  {% if f.cve %}<span class="tag">{{ f.cve }}</span>{% endif %}
+                  {% if f.cwe %}<span class="tag">{{ f.cwe }}</span>{% endif %}
+                  {% if f.template_id %}<span class="tag">{{ f.template_id }}</span>{% endif %}
+                </div>
+                {% if f.host %}<div class="fnd-url"><b>{{ f.host }}</b></div>{% endif %}
+                {% if f.url %}<div class="fnd-url">{{ f.url }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="fnd-body">
+              {% if f.impact %}<div class="fnd-block"><div class="fnd-impact">{{ f.impact }}</div></div>{% endif %}
+
+              {% if f.testing %}
+              <div class="fnd-block">
+                <div class="lbl">Testing detail</div>
+                <div class="kv">
+                  {% for k, v in f.testing %}<div class="k">{{ k }}</div><div class="v">{{ v }}</div>{% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              {% if f.output %}
+              <div class="fnd-block">
+                <div class="lbl">Scanner output</div>
+                {% for k, v in f.output %}
+                <div class="kv" style="margin-bottom:3px"><div class="k">{{ k }}</div><div class="v">{{ v }}</div></div>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              {% if f.poc.payload %}
+              <div class="fnd-block"><div class="lbl">Proof of concept — payload</div>
+                <pre class="poc-pre hot">{{ f.poc.payload }}</pre></div>
+              {% endif %}
+              {% if f.poc.request %}
+              <div class="fnd-block"><div class="lbl">Proof of concept — request</div>
+                <pre class="poc-pre">{{ f.poc.request }}</pre></div>
+              {% endif %}
+              {% if f.poc.response %}
+              <div class="fnd-block"><div class="lbl">Proof of concept — response</div>
+                <pre class="poc-pre">{{ f.poc.response }}</pre></div>
+              {% endif %}
+              {% if f.poc.curl %}
+              <div class="fnd-block"><div class="lbl">Reproduce</div>
+                <pre class="poc-pre">{{ f.poc.curl }}</pre></div>
+              {% endif %}
+
+              {% if f.tags %}
+              <div class="fnd-block">{% for t in f.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>
+              {% endif %}
+
+              {% if f.remediation %}<div class="fnd-block"><div class="fnd-fix"><b>Fix:</b> {{ f.remediation }}</div></div>{% endif %}
+
+              {% if f.reference %}
+              <div class="fnd-block"><div class="lbl">References</div>
+                {% for ref in f.reference %}<div class="fnd-url">{{ ref }}</div>{% endfor %}</div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+          {% if s.count > 40 %}
+          <div class="note" style="padding:6px 2px">… and {{ s.count - 40 }} more {{ s.label }} finding(s) — see the dashboard for the full list.</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+  </section>
+  {% endif %}
+
+  <!-- ======================= 5. ATTACK SURFACE INTELLIGENCE ======================= -->
+  {% if r.attack_surface and r.attack_surface.enabled %}
+  <section class="page-break">
+    <div class="sec-head"><span class="sec-num">05</span><h2>Attack Surface Intelligence</h2>
+      <span class="hint">Module 23 — Internet-facing exposure as seen from the outside</span></div>
+
+    <!-- Posture band -->
+    <div class="tiles" style="margin-bottom:10px">
+      <div class="tile {% if r.attack_surface.score >= 70 %}crit{% elif r.attack_surface.score >= 40 %}high{% elif r.attack_surface.score >= 15 %}med{% else %}ok{% endif %}">
+        <div class="k">Attack Surface Score</div><div class="v">{{ r.attack_surface.score }}</div>
+        <div class="x">/ 100 · {{ r.attack_surface.posture }}</div></div>
+      <div class="tile"><div class="k">Origin Assets</div><div class="v">{{ r.attack_surface.total_assets }}</div>
+        <div class="x">DNS-resolved origins</div></div>
+      <div class="tile"><div class="k">Findings</div><div class="v">{{ r.attack_surface.total_findings }}</div>
+        <div class="x">across all probes</div></div>
+      <div class="tile {% if r.attack_surface.total_cves %}crit{% endif %}"><div class="k">CVEs</div>
+        <div class="v">{{ r.attack_surface.total_cves }}</div><div class="x">known vulnerabilities</div></div>
+      <div class="tile"><div class="k">Open Ports</div><div class="v">{{ r.attack_surface.total_ports }}</div>
+        <div class="x">externally reachable</div></div>
+      <div class="tile"><div class="k">Geo-located</div><div class="v">{{ r.attack_surface.geo_located }}</div>
+        <div class="x">mapped assets</div></div>
+    </div>
+
+    <!-- Issues by severity -->
+    {% if r.attack_surface.issues_total %}
+    <div class="card card-pad" style="margin-bottom:12px">
+      <h3 class="sub">Issues by severity
+        <span style="font-weight:400;color:var(--text-muted);font-size:11px;margin-left:6px">
+          {{ r.attack_surface.issues_total }} total</span></h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        {% for sev in ['critical','high','medium','low','info'] %}
+          {% set n = r.attack_surface.issues_by_severity.get(sev, 0) %}
+          {% if n %}<span class="pill {{ sev }}">{{ sev }} {{ n }}</span>{% endif %}
+        {% endfor %}
+      </div>
+      {% if r.attack_surface.issues_by_category %}
+      <h3 class="sub" style="margin-top:8px">Issues by category</h3>
+      <div class="bars">
+        {% set cmax = r.attack_surface.issues_by_category[0][1] if r.attack_surface.issues_by_category else 1 %}
+        {% for cat, n in r.attack_surface.issues_by_category[:10] %}
+        <div class="bar-row">
+          <span class="lbl" title="{{ cat }}">{{ cat }}</span>
+          <span class="bar-track"><span class="bar-fill" style="width:{{ (n / cmax * 100)|round(0,'floor') }}%"></span></span>
+          <span class="n">{{ n }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Issue detail table -->
+    {% if r.attack_surface.issues %}
+    <div class="card" style="overflow:hidden;margin-bottom:12px">
+      <div class="card-pad"><h3 class="sub">Attack-surface issues — full detail</h3></div>
+      <table>
+        <thead><tr>
+          <th style="width:80px">Severity</th><th>Issue</th><th style="width:150px">Category</th>
+          <th class="num" style="width:56px">Assets</th><th style="width:96px">Confidence</th>
+        </tr></thead>
+        <tbody>
+          {% for iss in r.attack_surface.issues %}
+          <tr>
+            <td><span class="pill {{ iss.severity or 'info' }}">{{ iss.severity or 'info' }}</span></td>
+            <td style="font-size:12px">{{ iss.title or '—' }}
+              {% if iss.evidence %}<div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;word-break:break-word">{{ iss.evidence[:220] }}</div>{% endif %}
+              {% if iss.affected_host %}<div style="font-size:10.5px;color:var(--text-2);margin-top:2px" class="mono">{{ iss.affected_host }}</div>{% endif %}</td>
+            <td class="soft" style="font-size:11px">{{ iss.category or '—' }}</td>
+            <td class="num">{{ iss.affected_assets if iss.affected_assets is defined else '—' }}</td>
+            <td><span class="tag">{{ iss.confidence or '—' }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- Critical assets -->
+    {% if r.attack_surface.critical_assets %}
+    <div class="card" style="overflow:hidden;margin-bottom:12px">
+      <div class="card-pad"><h3 class="sub">Critical Assets — highest-risk origin hosts</h3></div>
+      <table>
+        <thead><tr><th>Asset</th><th style="width:104px">IP</th><th class="num" style="width:50px">Risk</th>
+          <th class="num" style="width:66px">Findings</th><th class="num" style="width:50px">Ports</th>
+          <th class="num" style="width:48px">CVEs</th><th style="width:130px">Location</th></tr></thead>
+        <tbody>
+          {% for a in r.attack_surface.critical_assets %}
+          <tr>
+            <td class="mono wrap">{{ a.host }}</td>
+            <td class="mono">{{ a.ip or '—' }}</td>
+            <td class="num"><span class="pill {{ a.risk_band }}" style="text-transform:none">{{ a.risk_score }}</span></td>
+            <td class="num">{{ a.findings }}</td>
+            <td class="num">{{ a.ports }}</td>
+            <td class="num">{{ a.cves }}</td>
+            <td class="soft" style="font-size:11px">{{ a.location }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- Top breakdown grids -->
+    {% macro asbars(title, rows, cls='') %}
+      {% if rows %}
+      <div class="card card-pad">
+        <h3 class="sub">{{ title }}</h3>
+        <div class="bars">
+          {% set bmax = rows[0][1] or 1 %}
+          {% for label, n in rows %}
+          <div class="bar-row">
+            <span class="lbl" title="{{ label }}">{{ label }}</span>
+            <span class="bar-track"><span class="bar-fill {{ cls }}" style="width:{{ (n / bmax * 100)|round(0,'floor') if bmax else 0 }}%"></span></span>
+            <span class="n">{{ n }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    {% endmacro %}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      {{ asbars('Top CVEs', r.attack_surface.top_cves, 'crit') }}
+      {{ asbars('Top Exposed Ports', r.attack_surface.top_ports) }}
+      {{ asbars('Top Exposed Services', r.attack_surface.top_services) }}
+      {{ asbars('Provider Exposure', r.attack_surface.top_providers) }}
+      {{ asbars('Top Countries', r.attack_surface.top_countries) }}
+    </div>
+
+    <!-- Enrichment sources -->
+    {% if r.attack_surface.enrichment %}
+    <div class="card card-pad" style="margin-top:12px">
+      <h3 class="sub">Enrichment sources</h3>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        {% for src, active in r.attack_surface.enrichment.items() %}
+        <span style="font-size:12px;color:{% if active %}var(--low){% else %}var(--text-muted){% endif %}">
+          {{ '●' if active else '○' }} {{ src|capitalize }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  <!-- ======================= 6. ATTACK PATHS ============================ -->
+  <section class="page-break">
+    <div class="sec-head"><span class="sec-num">06</span><h2>Attack Paths</h2>
+      <span class="hint">How this estate gets compromised, in order of urgency</span></div>
+
+    {% if not r.attack_paths %}
+      <div class="card empty">No attack path is supported by the signals this scan observed.</div>
+    {% else %}
+      <p class="note" style="margin:0 0 12px">
+        Each path chains observed signals into a sequence an external attacker could execute, mapped to MITRE
+        ATT&amp;CK. A path is listed only where every step is backed by something this scan actually saw —
+        the <em>Observed</em> line under each step states what that was.
+      </p>
+
+      {% for p in r.attack_paths %}
+      <article class="path {{ p.severity }}">
+        <div class="path-head">
+          <span class="path-id">{{ p.id }}</span>
+          <h3>{{ p.name }}</h3>
+          <span class="pill {{ p.severity }}">{{ p.severity }}</span>
+        </div>
+        <div class="path-chain">{{ p.tactics }}</div>
+        <div class="path-body">
+          <div class="premise">{{ p.premise }}</div>
+
+          <div class="kv">
+            <div>Likelihood<b>{{ p.likelihood }}</b></div>
+            <div>Impact<b>{{ p.impact }}</b></div>
+            <div>Steps<b>{{ p.steps|length }}</b></div>
+          </div>
+
+          <div class="blk">
+            <h4>Kill chain</h4>
+            <ol class="chain">
+              {% for s in p.steps %}
+              <li>
+                <span class="step-n">{{ loop.index }}</span>
+                <div class="step-phase">{{ s.phase }}</div>
+                <div class="step-tech">{{ s.technique }}</div>
+                <div class="step-act">{{ s.action }}</div>
+                {% if s.observed %}<div class="step-obs">{{ s.observed }}</div>{% endif %}
+              </li>
+              {% endfor %}
+            </ol>
+          </div>
+
+          {% if p.evidence %}
+          <div class="blk">
+            <h4>Supporting evidence</h4>
+            <ul class="ev">{% for e in p.evidence %}<li>{{ e }}</li>{% endfor %}</ul>
+          </div>
+          {% endif %}
+
+          <div class="blk">
+            <h4>How to break this path</h4>
+            <ul class="fix">{% for m in p.mitigations %}<li>{{ m }}</li>{% endfor %}</ul>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    {% endif %}
+  </section>
+
+  <!-- ======================= 6. ENTRY POINTS ======================= -->
+  <section class="page-break">
+    <div class="sec-head"><span class="sec-num">07</span><h2>Priority Entry Points</h2>
+      <span class="hint">Where an attacker starts, and why</span></div>
+    {% if not r.entry_points %}
+      <div class="card empty">No live host carried an attacker-relevant signal.</div>
+    {% else %}
+    <div class="card">
+      {% for e in r.entry_points %}
+      <div class="ep">
+        <div class="ep-rank">{{ loop.index }}</div>
+        <div class="ep-main">
+          <div class="ep-host">{{ e.host }}</div>
+          <div class="ep-meta">
+            <span class="tag">{{ e.ip or 'unresolved' }}</span>
+            {% if e.status %}<span class="sep">·</span>HTTP {{ e.status }}{% endif %}
+            <span class="sep">·</span>WAF: {{ e.waf }}
+            {% if e.cdn %}<span class="sep">·</span>CDN{% endif %}
+            {% if e.tech %}<span class="sep">·</span>{{ e.tech }}{% endif %}
+          </div>
+          <ul class="why">{% for w in e.reasons %}<li>{{ w }}</li>{% endfor %}</ul>
+        </div>
+        <div class="ep-score">
+          <div class="n" style="color:var(--{{ 'critical' if e.severity=='critical' else e.severity }})">{{ e.score }}</div>
+          <div class="l">score</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ======================= 7. OSINT ======================= -->
+  {% if r.summary.has_osint and r.findings.osint_sections %}
+  <section class="page-break">
+    <div class="sec-head"><span class="sec-num">08</span><h2>Passive Exposure &amp; Human Attack Surface</h2>
+      <span class="hint">Visible without touching your infrastructure</span></div>
+      <p class="note" style="margin:0 0 12px">Everything below was collected from third-party sources — an attacker
+        gathers it without sending a single packet to your estate, and without generating a log line you own.</p>
+      {% for s in r.findings.osint_sections %}
+      <div class="og">
+        <div class="og-head">
+          <span class="pill {{ s.worst }}">{{ s.worst }}</span>
+          <h3>{{ s.label }}</h3>
+          <span class="og-count">{{ s.count }} signal{{ 's' if s.count != 1 }}</span>
+        </div>
+        <div class="card" style="border-radius:0 0 var(--radius) var(--radius);overflow:hidden">
+          <table>
+            <thead><tr>
+              <th style="width:66px">Sev</th><th style="width:150px">Subject</th><th>Finding</th>
+              <th style="width:190px">Why it matters</th><th style="width:96px">Source</th>
+            </tr></thead>
+            <tbody>
+              {% for f in s.findings[:25] %}
+              <tr>
+                <td><span class="pill {{ f.severity or 'info' }}">{{ f.severity or 'info' }}</span></td>
+                <td class="mono wrap">{{ f.subject }}</td>
+                <td class="wrap">{{ f.title }}
+                  {% if f.evidence %}<div style="font:10.5px/1.4 var(--mono);color:var(--text-muted);margin-top:2px">{{ f.evidence }}</div>{% endif %}
+                </td>
+                <td class="wrap" style="font-size:11.5px;color:var(--text-2)">{{ f.risk or '—' }}</td>
+                <td style="font-size:11px;color:var(--text-muted)">{{ f.source }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% if s.count > 25 %}
+          <div class="note" style="padding:7px 10px;margin:0;border-top:1px solid var(--border)">
+            Showing 25 of {{ s.count }}. Full set in the dashboard OSINT view.</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+  </section>
+  {% endif %}
+
+  <!-- ======================= 8. APPENDIX ======================= -->
+  <section class="page-break">
+    <div class="sec-head"><span class="sec-num">09</span><h2>Appendix — Asset Inventory</h2>
+      <span class="hint">{{ r.appendix.assets|length }} resolving
+        {%- if r.appendix.unresolved_count %} · {{ r.appendix.unresolved_count }} enumerated but unresolved{% endif %}</span></div>
+    {% if not r.appendix.assets %}
+      <div class="card empty">No resolving asset recorded.</div>
+    {% else %}
+    <div class="card" style="overflow:hidden">
+      <table>
+        <thead><tr>
+          <th>Host</th><th style="width:104px">IP</th><th style="width:42px">HTTP</th>
+          <th style="width:96px">WAF</th><th style="width:34px">CDN</th><th style="width:104px">Ports</th>
+          <th style="width:82px">Tech</th><th class="num" style="width:44px">Risk</th>
+        </tr></thead>
+        <tbody>
+          {% for a in r.appendix.assets %}
+          <tr>
+            <td class="mono wrap">{{ a.host }}</td>
+            <td class="mono">{{ a.ip or '—' }}</td>
+            <td class="mono">{{ a.status or '—' }}</td>
+            <td class="soft" style="font-size:11px">{{ a.waf }}</td>
+            <td>{{ 'yes' if a.cdn else '—' }}</td>
+            <td class="mono">{{ a.ports|join(', ') if a.ports else '—' }}</td>
+            <td class="soft" style="font-size:11px;color:var(--text-2)">{{ a.tech or '—' }}</td>
+            <td class="num"><span class="pill {{ a.risk_band }}" style="text-transform:none">{{ a.risk_score }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <div class="card card-pad" style="margin-top:12px">
+      <h3 class="sub">Methodology &amp; scope</h3>
+      <p class="note" style="margin:0">
+        Passive enumeration (certificate transparency, DNS, public indexes, breach and brand intelligence) plus
+        unauthenticated active probing (HTTP fingerprinting, port scanning, template-based vulnerability checks)
+        against <b>{{ r.meta.target }}</b> and its discovered subdomains. No credentials were used, no exploitation
+        was attempted, and no data was extracted. Attack paths are analytical derivations from observed signals —
+        they describe what is <em>possible</em> given the exposure, not what has occurred. Port scan status for this
+        run: <b>{{ r.meta.scan_status }}</b>.
+      </p>
+    </div>
+
+    <div class="foot">
+      <span><b>ARISE</b> EASM {{ r.meta.engine_version }}</span>
+      <span>{{ r.meta.scan_id }}</span>
+      <span>Generated {{ r.meta.generated_at }}</span>
+      <span>{{ r.meta.classification }}</span>
+    </div>
+  </section>
+
+</div>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,181 @@
+# Python bytecode / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+# Isolated venv for schemathesis (keeps pip `httpx` out of the recon PATH)
+.venv-apitest/
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
+
+# macOS / OS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.temporary
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Project specific runtime and scan data directories
+# Only the empty folder itself (via .gitkeep) is tracked — never any contents.
+/logs/*
+!/logs/.gitkeep
+/outputs/*
+!/outputs/.gitkeep
+/scans/*
+!/scans/.gitkeep
+/scope/*
+!/scope/.gitkeep
+/jobs/*
+!/jobs/.gitkeep
+/state/
+/tests/.pytest_cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Backup and temporary files
+*.backup.*
+*.bak
+*~
+\#*\#
+
+# Local target configuration
+hosts.txt
+
+# Non-essential scripts, templates, plans, backups and implementation documents
+/ADVANCED_RECON_PIPELINE_IMPLEMENTATION.md
+/DASHBOARD_IMPLEMENTATION_PLAN.md
+/EASM_ORCHESTRATOR_IMPLEMENTATION_PLAN.md
+/FIXES_APPLIED.md
+/FOLDER_STRUCTURE.md
+/HOW_TO_START.txt
+/Zero-Recon-v1.sh
+/aiagentchat.txt
+/dashboard_v2.html
+/fix_manifest.py
+/fix_paths.py
+/logmidnight5thju.txt.rtf
+/plan.txt
+/start_dashboard.sh
+/test_vulns.py
+/tooltest.sh
+/zeroRecon.sh
+/templates/*.backup.html
+
+# Secrets & runtime AI settings (never commit)
+.env
+arise_settings.json
+
+# Auth + encrypted secret vault + session/master keys (never commit)
+users.json
+secrets.enc.json
+.arise_master.key
+arise_session.key
+
+# Scan job runner state + schedules (runtime data)
+schedules.json
+
+# Derived entity caches (regenerable)
+scans/*/.derived/
+
+# --- public-repo additions ---
+
+# Dashboard / dev logs
+*.log
+dashboard_*.log
+
+# Per-run / local tooling state
+.arise_kev_cache.json
+.arise_master.key
+arise_session.key
+
+# Local scratch / sample input lists
+apitarget.txt
+test.txt
+old_filter.txt
+RESTlerintel.txt
+DELIVERY_SUMMARY.txt
+
+# Design assets / large reference PDFs (not part of code)
+*.fig
+*.pdf
+qq1.png
+
+# Scratch / personal RTFs
+*.rtf
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code & other agent configs (local only)
+.claude/
+.agents/
+
+# Node / JS tool caches
+node_modules/
+
+# Internal dev notes, roadmaps, design assets — not application code
+*.ROADMAP.md
+*.DESIGN.md
+*.WIRING.md
+*.RESEARCH.md
+*IMPLEMENTATION*.md
+*_analysis.md
+analysis_*.md
+PIPELINE_FLOW.md
+SCHEMATHESIS_INTEGRATION.md
+Makefile
+ai_analyst/EXPLOITATION_TIER.md
+ai_analyst/PIPELINE_WIRING.md
+ARISE_PRODUCT_REVIEW.md
+ARISE_REMEDIATION_ROADMAP.md
+GUI_implementation_plan.md
+CHANGES.md
+PRODUCTION_READY.md
+shodan-deep-research-report.md
+DELIVERY_SUMMARY.txt
+filter_manager.js
+test_filter.js
+qq1.png
+ai/arise_nlp.backups.py
+*.backups.py

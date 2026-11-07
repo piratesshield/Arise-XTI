@@ -1,0 +1,204 @@
+{
+  "scan_id": "zepto.com-250926-0237",
+  "capec_v1": {
+    "capec_attack_paths.json": {
+      "generated_at": "2026-09-25T01:14:35.476780+00:00",
+      "scan_dir": "/Users/apple/Downloads/ARISEv4 2/scans/zepto.com-250926-0237",
+      "attack_path_engine": "host-grounded-v2",
+      "capec_version": "3.9",
+      "capec_patterns_loaded": 559,
+      "precede_edges": 172,
+      "findings_total": 0,
+      "findings_mapped": 0,
+      "asset_facts": {
+        "hosts": [
+          "api.zepto.com",
+          "bff-gateway.zepto.com",
+          "blog.zepto.com",
+          "chat-ui.zepto.com",
+          "investors.zepto.com",
+          "lite.zepto.com",
+          "pages.zepto.com",
+          "payments.zepto.com",
+          "qa.zepto.com",
+          "seal.zepto.com",
+          "staticweb.zepto.com",
+          "www.zepto.com",
+          "zepto.com"
+        ],
+        "techs": [
+          "amazon cloudfront",
+          "amazon elb",
+          "amazon web services",
+          "cloudflare",
+          "cloudflare browser insights",
+          "http/3"
+        ],
+        "has_api": true,
+        "has_auth_finding": true,
+        "cloud": true,
+        "services": []
+      },
+      "kg_summary": {
+        "node_counts": {
+          "target": 1
+        },
+        "edge_count": 0
+      },
+      "cloud_seeds_present": [
+        "mail_provider"
+      ],
+      "cloud_paths_count": 1,
+      "paths": [
+        {
+          "id": "cloud-password-spray",
+          "kind": "cloud",
+          "score": 65,
+          "realized": true,
+          "narrative": "Password spray (low-and-slow) \u2192 cloud / VPN initial access \u2014 enumerate valid users from OSINT/SaaS footprint \u2192 low-and-slow spray common passwords against cloud auth \u2192 obtain a valid session, bypass lockout",
+          "steps": [
+            {
+              "capec": "CAPEC-49",
+              "name": "enumerate valid users from OSINT/SaaS footprint",
+              "realized": false,
+              "by": null,
+              "what": "enumerate valid users from OSINT/SaaS footprint",
+              "how_to_attack": [],
+              "mitigation": "",
+              "skill": "",
+              "prerequisite": "",
+              "reachability_note": null,
+              "impact": [
+                "Gain Privileges"
+              ],
+              "nature": "cloud-chain"
+            },
+            {
+              "capec": "CAPEC-49",
+              "name": "low-and-slow spray common passwords against cloud auth",
+              "realized": false,
+              "by": null,
+              "what": "low-and-slow spray common passwords against cloud auth",
+              "how_to_attack": [],
+              "mitigation": "",
+              "skill": "",
+              "prerequisite": "",
+              "reachability_note": null,
+              "impact": [
+                "Gain Privileges"
+              ],
+              "nature": "cloud-chain"
+            },
+            {
+              "capec": "CAPEC-49",
+              "name": "obtain a valid session, bypass lockout",
+              "realized": false,
+              "by": null,
+              "what": "obtain a valid session, bypass lockout",
+              "how_to_attack": [],
+              "mitigation": "",
+              "skill": "",
+              "prerequisite": "",
+              "reachability_note": null,
+              "impact": [
+                "Gain Privileges"
+              ],
+              "nature": "cloud-chain"
+            }
+          ],
+          "entry_seed": [
+            "mail_provider"
+          ],
+          "evidence": "mail provider: google",
+          "evidence_tier": "recon",
+          "capec": [
+            "CAPEC-49",
+            "CAPEC-565"
+          ],
+          "mitre": [
+            "T1110.003",
+            "T1078.004"
+          ],
+          "terminal_impact": [
+            "Gain Privileges"
+          ],
+          "impact": [
+            "Gain Privileges"
+          ],
+          "host_grounded": false,
+          "entry": {
+            "capec": "CAPEC-49",
+            "capec_name": "Password spray (low-and-slow)",
+            "finding": {
+              "name": "Password spray (low-and-slow) \u2192 cloud / VPN initial access",
+              "description": "mail provider: google",
+              "severity": "critical",
+              "location": {
+                "host": ""
+              },
+              "evidence": {
+                "extracted": [
+                  "mail provider: google"
+                ]
+              },
+              "cwes": [],
+              "cves": []
+            },
+            "ref": "cloud-password-spray",
+            "host": "",
+            "hosts": [],
+            "severity": "critical"
+          },
+          "next_action": "obtain a valid session, bypass lockout",
+          "note": "exploitation evidence meets recon threshold"
+        }
+      ]
+    },
+    "capec_kg.json": {
+      "nodes": [
+        {
+          "type": "target",
+          "label": "api.zepto.com,bff-gateway.zepto.com,blog.zepto.com,chat-ui.z",
+          "attrs": {}
+        }
+      ],
+      "edges": [],
+      "summary": {
+        "node_counts": {
+          "target": 1
+        },
+        "edge_count": 0
+      }
+    }
+  },
+  "report": {
+    "path_count": 0,
+    "path_ids": [],
+    "path_severities": {},
+    "entry_point_count": 11,
+    "entry_point_hosts": [
+      "blog.zepto.com",
+      "bff-gateway.zepto.com",
+      "pages.zepto.com",
+      "api.zepto.com",
+      "www.zepto.com",
+      "investors.zepto.com",
+      "chat-ui.zepto.com",
+      "lite.zepto.com",
+      "payments.zepto.com",
+      "qa.zepto.com",
+      "staticweb.zepto.com"
+    ],
+    "org_score": null,
+    "grade": null
+  },
+  "kaiju": {
+    "entity_count": 125,
+    "relation_count": 124,
+    "issue_count": 1,
+    "issues_by_rule": {
+      "dev-staging-exposed": 1
+    },
+    "compounding_risk_hosts": []
+  }
+}

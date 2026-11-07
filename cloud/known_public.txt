@@ -1,0 +1,15 @@
+# ARISE — known intentionally-public bucket allowlist
+# ----------------------------------------------------
+# One bucket name per line. A public bucket whose name matches an entry here is
+# downgraded to INFO ("allowlisted intentional public bucket") instead of being
+# reported as a data-exposure finding — this suppresses the documented
+# static-asset / CDN / marketing-bucket false positive (see cloud/aws.md and
+# cloud/gcp.md "False Positives"). World-writable buckets are NEVER suppressed.
+#
+# Match is on the exact bucket NAME (not URL), case-insensitive. Lines starting
+# with '#' and blank lines are ignored.
+#
+# Examples (uncomment / replace with your own intentional public buckets):
+# acme-public-cdn
+# acme-marketing-assets
+# acme-static-web

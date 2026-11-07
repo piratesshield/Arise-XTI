@@ -1,0 +1,15 @@
+id: arise-broken-example
+
+info:
+  name: Broken example (missing severity, bad matcher type)
+  author: arise
+  tags: arise,test
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/api/status"
+    matchers:
+      - type: nonexistent_matcher_type
+        words:
+          - "ok"

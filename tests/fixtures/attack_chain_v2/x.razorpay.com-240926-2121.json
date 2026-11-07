@@ -1,0 +1,71 @@
+{
+  "scan_id": "x.razorpay.com-240926-2121",
+  "capec_v1": {
+    "capec_attack_paths.json": {
+      "generated_at": "2026-09-24T18:26:45.160524+00:00",
+      "scan_dir": "/Users/apple/Downloads/ARISEv4 2/scans/x.razorpay.com-240926-2121",
+      "attack_path_engine": "host-grounded-v2",
+      "capec_version": "3.9",
+      "capec_patterns_loaded": 559,
+      "precede_edges": 172,
+      "findings_total": 0,
+      "findings_mapped": 0,
+      "asset_facts": {
+        "hosts": [
+          "x.razorpay.com"
+        ],
+        "techs": [
+          "amazon cloudfront",
+          "amazon web services"
+        ],
+        "has_api": false,
+        "has_auth_finding": true,
+        "cloud": true,
+        "services": []
+      },
+      "kg_summary": {
+        "node_counts": {
+          "target": 1
+        },
+        "edge_count": 0
+      },
+      "cloud_seeds_present": [],
+      "cloud_paths_count": 0,
+      "paths": []
+    },
+    "capec_kg.json": {
+      "nodes": [
+        {
+          "type": "target",
+          "label": "x.razorpay.com",
+          "attrs": {}
+        }
+      ],
+      "edges": [],
+      "summary": {
+        "node_counts": {
+          "target": 1
+        },
+        "edge_count": 0
+      }
+    }
+  },
+  "report": {
+    "path_count": 0,
+    "path_ids": [],
+    "path_severities": {},
+    "entry_point_count": 1,
+    "entry_point_hosts": [
+      "x.razorpay.com"
+    ],
+    "org_score": null,
+    "grade": null
+  },
+  "kaiju": {
+    "entity_count": 1,
+    "relation_count": 0,
+    "issue_count": 0,
+    "issues_by_rule": {},
+    "compounding_risk_hosts": []
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "_comment": "Synthetic request/response corpus for validating response-analysis oracles. Each case carries a VULNERABLE side (the oracle MUST fire) and a SAFE side (the oracle MUST stay silent). Loaded by response_analysis.py --selftest to prove true-positive detection with zero false positives. Bodies are short but representative of real app behaviour.",
+  "cases": [
+    {
+      "id": "xss-search", "input_function": "search", "attack": "reflected-xss", "oracle": "reflected_xss",
+      "request": {"url": "https://t/search?q=<script>alert(1)</script>", "param": "q", "payload": "<script>alert(1)</script>"},
+      "vulnerable": {"status": 200, "headers": {"content-type": "text/html"}, "body": "<h1>Results for <script>alert(1)</script></h1><ul></ul>"},
+      "safe": {"status": 200, "headers": {"content-type": "text/html"}, "body": "<h1>Results for &lt;script&gt;alert(1)&lt;/script&gt;</h1>"}
+    },
+    {
+      "id": "xss-json-not-html", "input_function": "search", "attack": "reflected-xss", "oracle": "reflected_xss",
+      "request": {"url": "https://t/api/search?q=<script>alert(1)</script>", "param": "q", "payload": "<script>alert(1)</script>"},
+      "vulnerable": {"status": 200, "headers": {"content-type": "text/html"}, "body": "<div><script>alert(1)</script></div>"},
+      "safe": {"status": 200, "headers": {"content-type": "application/json"}, "body": "{\"q\":\"<script>alert(1)</script>\",\"results\":[]}"}
+    },
+    {
+      "id": "sqli-error", "input_function": "filter", "attack": "sqli-error", "oracle": "sql_error",
+      "request": {"url": "https://t/products?id=1'", "param": "id", "payload": "1'"},
+      "vulnerable": {"status": 500, "headers": {"content-type": "text/html"}, "body": "SQL syntax error near ''1''' at line 1 (SQLSTATE 42000) in /var/www/db.php"},
+      "safe": {"status": 200, "headers": {"content-type": "application/json"}, "body": "{\"error\":\"invalid id\",\"products\":[]}"}
+    },
+    {
+      "id": "sqli-boolean", "input_function": "filter", "attack": "sqli-boolean", "oracle": "sql_boolean",
+      "request": {"url": "https://t/items?cat=1", "param": "cat", "payload_true": "1 AND 1=1", "payload_false": "1 AND 1=2"},
+      "vulnerable": {"a": {"status": 200, "body": "AAAAAAAAAA rows: item1 item2 item3 item4 item5"}, "b": {"status": 200, "body": "no results"}},
+      "safe": {"a": {"status": 200, "body": "generic listing page identical"}, "b": {"status": 200, "body": "generic listing page identical"}}
+    },
+    {
+      "id": "sqli-time", "input_function": "filter", "attack": "sqli-time", "oracle": "sql_time",
+      "request": {"url": "https://t/report?year=2024", "param": "year", "payload": "2024;WAITFOR DELAY '0:0:5'--"},
+      "vulnerable": {"status": 200, "elapsed_ms": 5200, "body": "ok"},
+      "safe": {"status": 200, "elapsed_ms": 180, "body": "ok"}
+    },
+    {
+      "id": "ssti", "input_function": "contact", "attack": "ssti", "oracle": "ssti",
+      "request": {"url": "https://t/greeting", "param": "name", "payload": "{{7*7}}"},
+      "vulnerable": {"status": 200, "headers": {"content-type": "text/html"}, "body": "<p>Hello 49, welcome!</p>"},
+      "safe": {"status": 200, "headers": {"content-type": "text/html"}, "body": "<p>Hello {{7*7}}, welcome!</p>"}
+    },
+    {
+      "id": "user-enum", "input_function": "login", "attack": "user-enumeration", "oracle": "user_enum",
+      "request": {"url": "https://t/api/login", "method": "POST", "valid_user": "admin@t.com", "invalid_user": "nope@t.com"},
+      "vulnerable": {"valid": {"status": 200, "body": "{\"error\":\"incorrect password\"}"}, "invalid": {"status": 404, "body": "{\"error\":\"no account with that email\"}"}},
+      "safe": {"valid": {"status": 401, "body": "{\"error\":\"invalid credentials\"}"}, "invalid": {"status": 401, "body": "{\"error\":\"invalid credentials\"}"}}
+    },
+    {
+      "id": "auth-bypass-sqli", "input_function": "login", "attack": "auth-bypass", "oracle": "auth_state_change",
+      "request": {"url": "https://t/api/login", "method": "POST", "payload": "' OR '1'='1"},
+      "vulnerable": {"status": 200, "headers": {"set-cookie": "session=eyJ...; HttpOnly", "content-type": "application/json"}, "body": "{\"token\":\"eyJhbGciOi...\",\"role\":\"admin\"}"},
+      "safe": {"status": 401, "headers": {"content-type": "application/json"}, "body": "{\"error\":\"invalid credentials\"}"}
+    },
+    {
+      "id": "open-redirect", "input_function": "login", "attack": "open-redirect", "oracle": "open_redirect",
+      "request": {"url": "https://t/login?next=https://evil.example", "param": "next", "attacker_host": "evil.example"},
+      "vulnerable": {"status": 302, "headers": {"location": "https://evil.example/phish"}, "body": ""},
+      "safe": {"status": 302, "headers": {"location": "https://t/dashboard"}, "body": ""}
+    },
+    {
+      "id": "error-disclosure", "input_function": "profile", "attack": "error-disclosure", "oracle": "error_disclosure",
+      "request": {"url": "https://t/api/user/abc"},
+      "vulnerable": {"status": 500, "headers": {"content-type": "text/html"}, "body": "Traceback (most recent call last):\n  File \"/app/views.py\", line 88, in get_user\n    raise ValueError(user_id)\nValueError: abc"},
+      "safe": {"status": 400, "headers": {"content-type": "application/json"}, "body": "{\"error\":\"invalid user id\"}"}
+    },
+    {
+      "id": "bola-idor", "input_function": "profile", "attack": "bola", "oracle": "bola_idor",
+      "request": {"url": "https://t/api/v1/users/{id}/orders", "identity": "userA", "own_id": "1001", "other_id": "1002"},
+      "vulnerable": {"own": {"status": 200, "body": "{\"owner\":\"userA\",\"order\":\"A-001\"}"}, "other": {"status": 200, "body": "{\"owner\":\"userB\",\"order\":\"B-777\",\"card\":\"****1234\"}"}},
+      "safe": {"own": {"status": 200, "body": "{\"owner\":\"userA\",\"order\":\"A-001\"}"}, "other": {"status": 403, "body": "{\"error\":\"forbidden\"}"}}
+    },
+    {
+      "id": "mass-assignment", "input_function": "register", "attack": "mass-assignment", "oracle": "mass_assignment",
+      "request": {"url": "https://t/api/v1/users", "method": "POST", "injected": {"role": "admin", "is_admin": true}},
+      "vulnerable": {"status": 201, "headers": {"content-type": "application/json"}, "body": "{\"id\":42,\"email\":\"x@t.com\",\"role\":\"admin\",\"is_admin\":true}"},
+      "safe": {"status": 201, "headers": {"content-type": "application/json"}, "body": "{\"id\":42,\"email\":\"x@t.com\",\"role\":\"user\"}"}
+    },
+    {
+      "id": "upload-unrestricted", "input_function": "upload", "attack": "unrestricted-upload", "oracle": "upload_unrestricted",
+      "request": {"url": "https://t/upload", "method": "POST", "filename": "shell.php", "payload": "<?php echo 'PWNED_'.md5(1);?>"},
+      "vulnerable": {"status": 200, "fetch_url": "https://t/uploads/shell.php", "fetch": {"status": 200, "headers": {"content-type": "text/html"}, "body": "PWNED_c4ca4238a0b923820dcc509a6f75849b"}},
+      "safe": {"status": 200, "fetch_url": "https://t/uploads/shell.php", "fetch": {"status": 403, "headers": {"content-type": "text/html"}, "body": "Forbidden"}}
+    },
+    {
+      "id": "otp-leak", "input_function": "otp", "attack": "otp-leak", "oracle": "otp_leak",
+      "request": {"url": "https://t/api/otp/send", "method": "POST"},
+      "vulnerable": {"status": 200, "headers": {"content-type": "application/json"}, "body": "{\"sent\":true,\"debug_otp\":\"492013\",\"expires\":300}"},
+      "safe": {"status": 200, "headers": {"content-type": "application/json"}, "body": "{\"sent\":true,\"expires\":300}"}
+    },
+    {
+      "id": "ssrf-metadata", "input_function": "filter", "attack": "ssrf", "oracle": "ssrf_metadata",
+      "request": {"url": "https://t/fetch?url=http://169.254.169.254/latest/meta-data/iam/", "param": "url", "payload": "http://169.254.169.254/latest/meta-data/iam/"},
+      "vulnerable": {"status": 200, "headers": {"content-type": "text/plain"}, "body": "iam/security-credentials/\nAccessKeyId: ASIA...\nSecretAccessKey: wJalr..."},
+      "safe": {"status": 400, "headers": {"content-type": "application/json"}, "body": "{\"error\":\"url not allowed\"}"}
+    }
+  ]
+}

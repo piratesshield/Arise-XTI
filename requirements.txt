@@ -1,0 +1,226 @@
+# ARISE - "Summon Every Hidden Exposure." - Linux Setup Requirements
+# This file lists all dependencies for setting up a Linux environment for ARISE EASM security research
+# Run: pip3 install -r requirements.txt
+
+# ==============================================================================
+# SYSTEM PRE-REQUISITES (Run these FIRST in terminal)
+# ==============================================================================
+# 1. Update package lists
+#    sudo apt-get update -y
+#
+# 2. Install core utilities & build tools
+#    sudo apt-get install -y build-essential wget curl git jq python3 python3-pip python3-venv golang
+#
+# 3. Install Nmap
+#    sudo apt-get install -y nmap
+#
+# 4. Install libpcap-dev (required to build naabu)
+#    sudo apt-get install -y libpcap-dev
+#
+# 5. Install MassDNS (required by puredns)
+#    (setup.sh handles compiling this from source automatically)
+#
+# 6. Install global Python packages (if needed)
+#    pip3 install wafw00f tldextract
+
+# ==============================================================================
+# ⚠️  IMPORTANT — pip `httpx` vs ProjectDiscovery `httpx` NAME COLLISION
+# ==============================================================================
+# The Python `httpx` package (pulled in TRANSITIVELY by `anthropic`, and by
+# `schemathesis`) installs a console script literally named `httpx` into the
+# active environment's bin/ directory. If that bin/ sits ahead of ~/go/bin (or
+# ~/.pdtm/go/bin) on PATH, then `httpx` in easm-pipeline.sh resolves to the
+# Python client instead of the ProjectDiscovery Go binary the recon pipeline
+# needs — HTTP discovery breaks.
+#
+# The fix is ISOLATION — install the Python side in its own virtualenv so its
+# bin/ (with the pip `httpx` script) never joins the recon PATH:
+#
+#   python3 -m venv .venv-apitest              # separate env, see below
+#   .venv-apitest/bin/pip install -r requirements-apitest.txt
+#
+# For the DASHBOARD (which needs `anthropic` -> httpx lib), prefer running it in
+# its own venv too, and always keep the ProjectDiscovery bin dir FIRST on PATH:
+#   export PATH="$HOME/go/bin:$HOME/.pdtm/go/bin:$PATH"
+# Verify the winner is the Go binary:  file "$(command -v httpx)"  # -> ELF/Mach-O
+#
+# `verify-tools.sh` / `verify_mac_deps.sh` check this collision automatically.
+# ==============================================================================
+
+# ==============================================================================
+# PYTHON DEPENDENCIES (pip3 install -r requirements.txt)
+# ==============================================================================
+
+# HTTP and API clients
+requests>=2.31.0
+urllib3>=2.0.0
+
+# OSINT & Human Exposure Intelligence (Module 18 — osint_intel.py)
+# dnstwist powers brand/typosquat monitoring. certifi supplies a portable,
+# always-present CA bundle for the engine's stdlib HTTP calls (crt.sh, RDAP,
+# Shodan InternetDB, iTunes Search, Google News RSS, ransomwatch, HIBP/IntelX/
+# LeakCheck/GitHub connectors) — needed because some Python installs (notably
+# python.org macOS builds pre "Install Certificates.command") ship without a
+# usable default CA path.
+dnstwist>=20240101
+certifi>=2024.0.0
+
+# JSON and data processing
+python-dateutil>=2.8.2
+pytz>=2023.3
+
+# Security libraries
+pyOpenSSL>=23.2.0
+cryptography>=41.0.0
+
+# Network tools
+scapy>=2.5.0
+
+# DOM parsing and web scraping
+beautifulsoup4>=4.12.2
+lxml>=4.9.3
+html5lib>=1.1
+
+# CDP / headless-browser input-functions discovery (Module 20.2, input_discovery.py)
+# Uses the installed Chrome via channel="chrome"; run `playwright install chromium`
+# only if no system Chrome/Chromium is available.
+playwright>=1.40.0
+
+# Data visualization (for reports)
+matplotlib>=3.7.2
+pandas>=2.1.1
+tabulate>=0.9.0
+
+# Shared NLP engine Tier 2 (ai/arise_nlp.py) — TF-IDF vectorization + cosine
+# similarity, used for response classification confidence and near-duplicate
+# finding dedup (intel/response_intel.py's dedup_findings, threshold 0.85).
+# Optional at import time (module fails-safe to Tier-1 regex/Jaccard without
+# it) but required for ARISE to actually run the ML path it was built for.
+scikit-learn>=1.9.1
+
+# CLI utilities
+colorama>=0.4.6
+tqdm>=4.66.1
+rich>=13.6.0
+
+# Configuration and utilities
+PyYAML>=6.0.1
+python-dotenv>=1.0.0
+
+# Dashboard dependencies
+flask>=3.0.0
+flask-cors>=4.0.0
+# Production WSGI server — dashboard refuses to run Werkzeug's debug server
+# with debug=True on a non-loopback host; this is what actually serves it.
+waitress>=2.1.2
+# Scheduled/recurring scans (dashboard scheduler)
+APScheduler>=3.10.0
+
+# AI Security Analyst (dashboard side panel — Claude analysis + Slack export)
+anthropic>=0.40.0
+
+# Additional utilities
+python-magic>=0.4.27
+filetype>=1.2.0
+validators>=0.22.0
+
+# Web directory discovery
+dirsearch>=0.4.3
+
+# API security — property-based / spec-conformance testing (P3 gap-fill
+# complementing RESTler, which requires a published Swagger/OpenAPI spec).
+# Fills coverage for endpoints intel-discovered but never publicly documented.
+schemathesis>=3.30.0
+
+# Phone-number parsing — ai/arise_nlp.py uses `phonenumbers` to validate
+# region-formatted phone candidates (part of the PII false-positive fix that
+# killed the meesho "mobile leakage" FP; a bare 10-digit ID is no longer
+# auto-classified as a phone number).
+phonenumbers>=8.13.0
+
+# WebSocket client — evidence/wss_agent.py and offensive/protocol_exec.py
+# speak native WSS to in-scope hosts for the R1-R8 identity/protocol layer.
+websocket-client>=1.6.0
+
+# PDF utilities — report generation + evidence capture read/write PDF
+# artefacts (dashboard "Export report" and arise_evidence attachments).
+pypdf>=3.17.0
+
+# Registrable-label anchoring — cloud_storage_enum/osint_intel use tldextract
+# to pull the org label out of the --target domain (the "myntra" of
+# api.myntra.com) so bucket/affix expansion stays anchored to the user's org
+# and does not drift into unrelated public buckets.
+tldextract>=5.1.0
+
+# ==============================================================================
+# GO TOOLS (Install via: go install tool@latest)
+# ==============================================================================
+# These tools are required for the ARISE pipeline. Install them in order:
+# NOTE: naabu requires libpcap first -> sudo apt-get install libpcap-dev
+
+# Subdomain enumeration
+# go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+# go install -v github.com/d3mondev/puredns/v2@latest
+# go install -v github.com/projectdiscovery/dnsx/cmd/dnsx@latest
+# go install -v github.com/tomnomnom/anew@latest
+
+# HTTP and port scanning
+# go install -v github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
+# go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+# go install -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest
+
+# Directory and content discovery
+# go install -v github.com/lc/gau/v2/cmd/gau@latest
+# go install -v github.com/jaeles-project/gospider@latest
+# go install -v github.com/projectdiscovery/katana/cmd/katana@latest
+
+# Fuzzing tools
+# go install -v github.com/ffuf/ffuf@latest
+# go install -v github.com/tomnomnom/gf@latest
+# go install -v github.com/tomnomnom/qsreplace@latest
+# go install -v github.com/dwisiswant0/bhedak@latest
+
+# Secret scanning
+# go install -v github.com/trufflesecurity/trufflehog/v3/cmd/trufflehog@latest
+
+# XSS tools
+# go install -v github.com/hahwul/dalfox/v2@latest
+
+# ==============================================================================
+# GF PATTERNS (required for gf xss / param fuzzing modules)
+# ==============================================================================
+# mkdir -p ~/.gf
+# git clone https://github.com/1ndianl33t/Gf-Patterns ~/.gf-patterns-tmp && cp ~/.gf-patterns-tmp/*.json ~/.gf/ && rm -rf ~/.gf-patterns-tmp
+
+# ==============================================================================
+# NUCLEI TEMPLATES
+# ==============================================================================
+# Clone nuclei-templates (required for vulnerability scanning)
+# mkdir -p ~/recon/nuclei-templates
+# git clone https://github.com/projectdiscovery/nuclei-templates.git ~/recon/nuclei-templates
+
+# ==============================================================================
+# WORDLISTS (Download to ~/recon/lists/)
+# ==============================================================================
+# mkdir -p ~/recon/lists
+# cd ~/recon/lists
+
+# DNS wordlists
+# wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/subdomains-top1million-110000.txt
+# wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/subdomains-top1million-5000.txt
+# wget https://raw.githubusercontent.com/trickest/resolvers/main/resolvers.txt
+
+# Web content wordlists
+# wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/Web-Content/common.txt
+# wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/Web-Content/big.txt
+# wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/Web-Content/directory-list-2.3-medium.txt
+
+# Fuzzing payloads
+# wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Fuzzing/LFI/LFI-Jhaddix.txt
+# wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Fuzzing/SQLi/SQL-Injection-Payloads.txt
+# wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Fuzzing/XSS/XSS-Jhaddix.txt
+
+# ==============================================================================
+# PATH SETUP (Add to ~/.zshrc or ~/.bashrc)
+# ==============================================================================
+# export PATH=$PATH:~/go/bin:~/recon/lists

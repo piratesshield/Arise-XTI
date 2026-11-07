@@ -1,0 +1,54 @@
+{
+  "engine": "AriseAI",
+  "target": "selftest",
+  "scan_dir": "selftest",
+  "generated_at": "2026-10-22T19:09:20Z",
+  "provider": "claude",
+  "model": "claude-opus-4-8",
+  "counts": {
+    "findings": 0,
+    "exploited": 0,
+    "proven": 0,
+    "observations": 0,
+    "hypotheses": 0,
+    "realized": 0,
+    "rejected": 0
+  },
+  "findings": [],
+  "hypotheses": [],
+  "writeup": {},
+  "coverage": {
+    "evidence_items": 0,
+    "hosts": 0,
+    "endpoints": 0,
+    "hypotheses_total": 0,
+    "hypotheses_rejected": 0,
+    "hypotheses_realized": 0,
+    "live_checks": 4,
+    "live_verify_ran": true,
+    "autonomous_ran": false,
+    "autonomous_actions": 0,
+    "autonomous_confirmed": 0,
+    "budget_note": ""
+  },
+  "killchain": {
+    "adversary": "Opportunistic",
+    "engagement_depth": 1,
+    "deepest_tactic": "Reconnaissance",
+    "phase_timeline": [
+      {
+        "tactic": "reconnaissance",
+        "label": "Reconnaissance",
+        "entered_at": "2026-10-22T19:09:20Z",
+        "finding_count": 1,
+        "techniques": []
+      }
+    ],
+    "breach_paths": [],
+    "pivots_generated": 0,
+    "summary": "Engagement limited to reconnaissance \u2014 no exploitation achieved."
+  },
+  "adversary_profile": null,
+  "artifacts": {},
+  "error": "no API key for claude"
+}

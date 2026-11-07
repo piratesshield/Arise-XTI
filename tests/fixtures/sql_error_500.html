@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>500 Internal Server Error</title></head>
+<body>
+<h1>Whoops, looks like something went wrong.</h1>
+<pre>
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your
+SQL syntax; check the manual that corresponds to your MySQL server version for the
+right syntax to use near '\'' at line 1
+
+/var/www/html/app/Http/Controllers/UserController.php on line 88
+Stack trace:
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connection.php(760)
+#1 /var/www/html/app/Models/User.php(42): Illuminate\Database\Connection->select()
+</pre>
+<p>Laravel Framework 8.83.27</p>
+</body>
+</html>

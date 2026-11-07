@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "AriseAI",
+          "informationUri": "https://arise.local/ai-analyst",
+          "version": "2.0",
+          "rules": []
+        }
+      },
+      "results": []
+    }
+  ]
+}

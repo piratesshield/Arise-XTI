@@ -1,0 +1,202 @@
+# Cloud storage bucket name mutations
+# Common affixes applied to the base keywords (domain, subdomains, service names)
+# Format: prefix | suffix | mutation (used to generate variants)
+
+# Backup & archive
+backup
+backups
+bak
+archive
+archived
+archives
+historical
+old
+previous
+
+# Staging & development
+staging
+stage
+stg
+dev
+development
+devel
+test
+testing
+tests
+debug
+debugs
+qa
+uat
+sandbox
+lab
+
+# Production & live
+prod
+production
+live
+live-data
+current
+
+# Logs & monitoring
+logs
+log
+logging
+metrics
+monitoring
+events
+traces
+audit
+audits
+analytics
+
+# Data & content
+data
+content
+files
+assets
+static
+media
+documents
+documents-archive
+images
+images-archive
+videos
+downloads
+uploads
+
+# Infrastructure & config
+config
+configuration
+configs
+settings
+infrastructure
+infra
+terraform
+cloudformation
+ci-cd
+jenkins
+deployment
+deployments
+releases
+release
+
+# Database & cache
+database
+databases
+db
+backup-db
+db-backups
+mysql-backups
+postgres-backups
+mongodb-backups
+elasticsearch
+
+# Application specific
+app
+application
+service
+services
+api-data
+api-files
+web
+website
+frontend
+backend
+mobile
+sdk
+
+# Temporary & cache
+tmp
+temp
+temporary
+cache
+caching
+work
+working
+scratch
+temp-files
+
+# Organization patterns
+internal
+company
+corp
+corporate
+org
+business
+team
+teams
+department
+departments
+
+# Region/location based (add location names)
+us
+eu
+asia
+apac
+us-east
+us-west
+eu-west
+ap-south
+ap-southeast
+
+# Version-based
+v1
+v2
+v3
+version1
+old-version
+legacy
+
+# Status markers
+active
+inactive
+archived
+deprecated
+backup-old
+mirror
+replica
+export
+import
+
+# Special purposes
+disaster-recovery
+dr
+failover
+migration
+sync
+replication
+clone
+copy
+snapshot
+restore
+
+# Project names (common generic ones)
+project
+projects
+workspace
+workspaces
+customer
+customers
+client
+clients
+partner
+partners
+
+# Default/common generic names
+main
+default
+public
+private
+shared
+common
+general
+misc
+other
+
+# Numbered variants (will be combined with base)
+001
+002
+003
+1st
+2nd
+3rd

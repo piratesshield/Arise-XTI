@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARISE — Knowledge Transfer</title>
+<style>
+:root {
+    --bg: #0B0F14; --surface: #151B23; --surface-2: #1A222D; --border: #263241;
+    --text: #F8FAFC; --text-dim: #CBD5E1; --text-faint: #94A3B8;
+    --accent: #60A5FA; --accent-dim: rgba(96,165,250,.12);
+    --crit: #F87171; --high: #FB923C; --med: #FBBF24; --low: #4ADE80; --info: #60A5FA;
+    --aws: #ff9900; --gcp: #4285f4; --azure: #0078d4;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background:var(--bg); color:var(--text); line-height:1.7; }
+.container { max-width:1100px; margin:0 auto; padding:40px 24px 80px; }
+.back { display:inline-flex; align-items:center; gap:6px; color:var(--accent); text-decoration:none; font-size:14px; margin-bottom:24px; }
+.back:hover { text-decoration:underline; }
+h1 { font-size:32px; font-weight:800; margin-bottom:6px; }
+h1 span { color:var(--accent); }
+.subtitle { color:var(--text-dim); font-size:15px; margin-bottom:36px; }
+h2 { font-size:20px; font-weight:700; margin:36px 0 14px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+h3 { font-size:16px; font-weight:600; margin:20px 0 8px; color:var(--accent); }
+p, li { color:var(--text-dim); font-size:14px; }
+ul, ol { padding-left:22px; margin-bottom:14px; }
+li { margin-bottom:6px; }
+code { background:var(--surface-2); padding:2px 6px; border-radius:4px; font-size:13px; font-family:ui-monospace, Menlo, monospace; color:var(--text); }
+pre { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; overflow-x:auto; margin:12px 0 18px; font-size:13px; line-height:1.5; }
+pre code { background:none; padding:0; }
+table { width:100%; border-collapse:collapse; margin:12px 0 18px; font-size:13px; }
+th { background:var(--surface); color:var(--text); font-weight:600; text-align:left; padding:10px 14px; border-bottom:2px solid var(--border); }
+td { padding:10px 14px; border-bottom:1px solid var(--border); color:var(--text-dim); vertical-align:top; }
+tr:hover td { background:var(--surface-2); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
+.b-crit { background:rgba(255,77,109,.14); color:var(--crit); }
+.b-high { background:rgba(255,138,61,.14); color:var(--high); }
+.b-med { background:rgba(255,196,61,.14); color:var(--med); }
+.b-low { background:rgba(74,222,128,.14); color:var(--low); }
+.b-info { background:rgba(139,152,189,.14); color:var(--info); }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px; margin:14px 0; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.arch-flow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:14px 0; }
+.arch-box { background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:10px 16px; text-align:center; font-size:13px; font-weight:600; }
+.arch-box.highlight { border-color:var(--accent); background:var(--accent-dim); color:var(--accent); }
+.arch-arrow { color:var(--text-faint); font-size:18px; }
+.risk-table td:first-child { font-weight:600; }
+.provider { display:inline-flex; align-items:center; gap:4px; }
+.toc { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 24px; margin-bottom:30px; }
+.toc-title { font-weight:700; font-size:14px; margin-bottom:8px; }
+.toc a { color:var(--accent); text-decoration:none; font-size:13px; display:block; padding:3px 0; }
+.toc a:hover { text-decoration:underline; }
+.tool-cat { color:var(--text); font-weight:600; margin-top:4px; }
+@media(max-width:768px) { .grid-2{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="container">
+    <a href="/" class="back">&larr; Back to Dashboard</a>
+    <h1><span>ARISE XTI</span> Knowledge Transfer</h1>
+    <p class="subtitle">AI-Powered External Threat Intelligence · 28-module pipeline · CAPEC attack chains · AriseAI autonomous pentester · GitHub: <a href="https://github.com/piratesshield/arisexti" style="color:var(--accent)">piratesshield/arisexti</a></p>
+
+    <h2 id="keys" style="background:var(--accent-dim); padding:16px; border-radius:10px; margin-bottom:24px; border-left:4px solid var(--accent)">🔑 API Keys &amp; Secrets</h2>
+    <div class="card">
+        <h3>Mandatory</h3>
+        <table>
+            <tr><td><code>ARISE_ADMIN_USER</code></td><td>Dashboard login username</td></tr>
+            <tr><td><code>ARISE_ADMIN_PASSWORD</code></td><td>Dashboard login password</td></tr>
+            <tr><td><code>ARISE_SECRET</code></td><td>Fernet key encrypting the on-disk vault (<code>secrets.enc.json</code>)</td></tr>
+        </table>
+        <h3>Optional — AI Analyst / Red Team (at least one)</h3>
+        <table>
+            <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Claude — recommended for AriseAI pentester</td></tr>
+            <tr><td><code>OPENAI_API_KEY</code></td><td>GPT models</td></tr>
+            <tr><td><code>GEMINI_API_KEY</code> / <code>GOOGLE_API_KEY</code></td><td>Gemini — default provider</td></tr>
+        </table>
+        <h3>Optional — External Intel</h3>
+        <table>
+            <tr><td><code>SHODAN_API_KEY</code></td><td>Shodan tab — external view, coverage-gap ports, geo map</td></tr>
+            <tr><td><code>CENSYS_API_ID</code> + <code>CENSYS_API_SECRET</code></td><td>Internet Intel TLS/services</td></tr>
+            <tr><td><code>GREYNOISE_API_KEY</code></td><td>Background-noise scoring</td></tr>
+            <tr><td><code>VIRUSTOTAL_API_KEY</code></td><td>Passive DNS / subdomain enrichment</td></tr>
+            <tr><td><code>INTELX_API</code></td><td>IntelX breach &amp; paste search</td></tr>
+            <tr><td><code>GITHUB_TOKEN</code></td><td>GitHub code / secret OSINT (unauth is rate-limited)</td></tr>
+        </table>
+        <h3>Optional — Notifications &amp; Infra</h3>
+        <table>
+            <tr><td><code>SLACK_WEBHOOK</code></td><td>Scan-summary &amp; finding export to Slack</td></tr>
+            <tr><td><code>ARISE_DASHBOARD_PORT</code></td><td>Override the dashboard port (default <code>5059</code>)</td></tr>
+        </table>
+        <p style="margin-top:10px;font-size:13px;color:var(--text-faint)">Keys may be exported in the shell or <code>.env</code>, OR pasted into <b>Settings → API Keys</b> in the dashboard — the vault is encrypted at rest with <code>ARISE_SECRET</code>.</p>
+    </div>
+
+    <h2 id="new-features" style="background:var(--accent-dim); padding:16px; border-radius:10px; margin-bottom:24px; border-left:4px solid var(--accent)">🆕 Latest Features & Enhancements (Phase 1-4)</h2>
+    <div class="card">
+        <h3>1. API Intelligence Engine</h3>
+        <p><b>Tool:</b> <code>api_intelligence_engine.py</code></p>
+        <ul>
+            <li>Advanced endpoint discovery and correlation from all pipeline sources (crawl, JS extraction, directory scan)</li>
+            <li>HTTP method probing, auth requirement detection, parameter classification</li>
+            <li>Deterministic vulnerability classification without AI inference</li>
+            <li>Outputs <code>api_findings.jsonl</code> in dashboard-ready format</li>
+            <li>Integrated into pipeline as primary API security engine (post-Module 16)</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>2. ARISE Entity & Correlation Engine (Phases 0-4)</h3>
+        <p><b>Tools:</b> <code>kaiju_entities.py</code>, <code>kaiju_issues.py</code></p>
+        <ul>
+            <li><b>Phase 0 (Foundations):</b> Entity index engine (7 types: domain, subdomain, host, service, technology, vulnerability, certificate) with stable, deterministic refs (SHA1 natural keys)</li>
+            <li><b>Phase 1 (Entity Drawer):</b> Global right-panel component with Summary/Related/Issues/Raw tabs, clickable entity navigation</li>
+            <li><b>Phase 2 (Issues Lens):</b> Deep-linked issues landing page with severity filters, status dropdown, sortable rows, risk scoring</li>
+            <li><b>Phase 3 (Issues Lifecycle):</b> 8 correlation rules (exposed-service, dev-staging-exposed, missing-headers, leaked-secret, hsts-gap, new-asset, no-waf, compounding-risk); INV-2 state merge (false_positive never auto-resolved); atomic writes with tombstone reattach</li>
+            <li><b>Phase 4 (Timeline):</b> Append-only event stream with 11 event kinds, revision diffs, retention-exempt state</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>4. Extended Verification Module 19 (Production-Safe)</h3>
+        <p><b>Tools:</b> <code>interactsh</code>, <code>crlfuzz</code>, <code>jwt_tool</code>, <code>SSTImap</code>, <code>graphw00f</code>, <code>smuggler</code></p>
+        <ul>
+            <li>Dedicated safe-mode confirmation layer for 6 vulnerability classes nuclei can't structurally reach</li>
+            <li><b>Blind SSRF:</b> OOB callbacks via interactsh (no internal data read)</li>
+            <li><b>CRLF/JWT/SSTI/GraphQL:</b> Offline or read-only confirmation (no exploitation)</li>
+            <li><b>HTTP Smuggling:</b> Gated off by default (<code>CHECK_SMUGGLING=true</code>) due to production traffic risk</li>
+            <li>Outputs <code>extended_findings.jsonl</code> with confidence badges (Confirmed/Probable/Info)</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>5. Autonomous AI Layer (Background Tasks)</h3>
+        <p><b>Tools:</b> <code>arise_autonomous.py</code>, <code>arise_jobs.py</code>, <code>arise_secure.py</code>, <code>arise_drive.py</code></p>
+        <ul>
+            <li><b>Autonomous Watcher:</b> Background loop in dashboard for auto-correlate, auto-summarize, Drive sync</li>
+            <li><b>Job Queue:</b> Scheduled pen-test jobs with granular tool control and safety constraints</li>
+            <li><b>Secure Execution:</b> Isolation, sandboxing, audit logging for autonomous actions</li>
+            <li><b>Drive Integration:</b> Retention-exempt state sync to Google Drive (first priority)</li>
+            <li>All autonomous actions default OFF unless explicitly enabled; non-destructive only</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>6. AI Probing & Intelligence</h3>
+        <p><b>Tool:</b> <code>ai_probing.py</code></p>
+        <ul>
+            <li>LLM-powered hypothesis generation for targets (e.g., likely attack vectors, undiscovered endpoints)</li>
+            <li>Used in autonomous mode to guide fuzzing and probing strategies</li>
+            <li>Gated by safety constraints; no false positive injection</li>
+        </ul>
+    </div>
+
+    <div class="toc">
+        <div class="toc-title">Contents</div>
+        <a href="#keys">🔑 API Keys &amp; Secrets</a>
+        <a href="#new-features">🆕 Latest Features</a>
+        <a href="#architecture">1. Architecture Overview</a>
+        <a href="#pipeline">2. Pipeline Modules (28 Stages)</a>
+        <a href="#tools">3. Tools & Dependencies</a>
+        <a href="#risk-model">4. Risk Scoring Model</a>
+        <a href="#cloud">5. Cloud Exposure Detection</a>
+        <a href="#api-security">6. API Security Testing</a>
+        <a href="#extended">6b. Extended Verification (safe mode)</a>
+        <a href="#kaiju">6c. ARISE Correlation Engine</a>
+        <a href="#dashboard">7. Dashboard & API Endpoints</a>
+        <a href="#operations">8. Operations & CLI</a>
+        <a href="#tuning">9. Tuning & Configuration</a>
+    </div>
+
+    <h2 id="architecture">1. Architecture Overview</h2>
+    <p>ARISE is a state-driven EASM toolkit that converts a list of target domains into a complete exposure map. The system has three layers:</p>
+    <div class="arch-flow">
+        <div class="arch-box">hosts.txt<br><small>Target domains</small></div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-box highlight">arise.py<br><small>Orchestrator</small></div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-box highlight">easm-pipeline.sh<br><small>28-Module Pipeline</small></div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-box">manifest.json<br><small>State Store</small></div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-box highlight">dashboard.py<br><small>Flask Dashboard</small></div>
+    </div>
+    <div class="card">
+        <h3>Data Flow</h3>
+        <ol>
+            <li><code>arise.py</code> reads <code>hosts.txt</code>, creates a timestamped scan directory under <code>scans/</code>, launches the pipeline</li>
+            <li><code>easm-pipeline.sh</code> runs 18 modules sequentially, writing results to numbered subdirectories and updating <code>manifest.json</code></li>
+            <li><code>dashboard.py</code> reads scan directories, parses all data sources (manifest, nuclei JSON, nmap services, httpx tech, cloud findings), and serves a real-time dashboard on port 5000</li>
+            <li>Each scan is isolated: <code>scans/{domain}-{DDMMYY}-{HHMM}/</code> with its own manifest, logs, and module output folders</li>
+        </ol>
+    </div>
+
+    <h2 id="pipeline">2. Pipeline Modules (28 Stages + Correlation)</h2>
+    <table>
+        <thead><tr><th>#</th><th>Module</th><th>Tool(s)</th><th>Purpose</th><th>Output</th></tr></thead>
+        <tbody>
+            <tr><td>01</td><td>Asset Discovery</td><td>subfinder, haktrails</td><td>Passive subdomain enumeration from multiple sources</td><td>Subdomain list</td></tr>
+            <tr><td>02</td><td>Subdomain Enumeration</td><td>puredns, massdns</td><td>DNS brute-force with permutation and validation</td><td>Validated subdomains</td></tr>
+            <tr><td>03</td><td>DNS Resolution</td><td>dnsx</td><td>Bulk A/AAAA resolution, CDN vs origin classification</td><td>Resolved IPs, CNAME chains</td></tr>
+            <tr><td>04</td><td>HTTP Discovery</td><td>httpx</td><td>HTTP probing, status codes, tech detection, response storage</td><td>http_confirmed.json, tech stack</td></tr>
+            <tr><td>05</td><td>WAF Detection</td><td>wafw00f, nuclei, httpx</td><td>3-tier WAF fingerprinting (wafw00f &rarr; nuclei &rarr; httpx)</td><td>WAF vendor per host</td></tr>
+            <tr><td>06</td><td>Web Crawling</td><td>katana, gospider, gau</td><td>Active + passive URL harvesting for endpoint coverage</td><td>all_urls.txt</td></tr>
+            <tr><td>07</td><td>Header Analysis</td><td>Custom Python</td><td>Security header grading (HSTS, CSP, X-Frame, etc.)</td><td>Header scores per host</td></tr>
+            <tr><td>08</td><td>Service Fingerprinting</td><td>nmap (-sV)</td><td>Version detection for non-HTTP services on open ports</td><td>services.json</td></tr>
+            <tr><td>09</td><td>Directory Discovery</td><td>dirsearch, ffuf</td><td>WAF-aware directory brute-forcing (batched, rate-limited)</td><td>200/403/500 response lists</td></tr>
+            <tr><td>10</td><td>Secret Scanning</td><td>trufflehog, gf</td><td>Scan JS files & endpoints for API keys, tokens, credentials</td><td>Secret findings</td></tr>
+            <tr><td>11</td><td>Parameter Fuzzing</td><td>ffuf, gf</td><td>Discover URL parameters for injection testing</td><td>Parameter list per endpoint</td></tr>
+            <tr><td>12</td><td>Nuclei Scanning</td><td>nuclei</td><td>Template-based vulnerability detection (CVEs, misconfigs)</td><td>Nuclei JSON results</td></tr>
+            <tr><td>13</td><td>XSS Testing</td><td>dalfox</td><td>Reflected/DOM XSS validation on discovered parameters</td><td>Confirmed XSS findings</td></tr>
+            <tr><td>14</td><td>SQLi Testing</td><td>sqlmap</td><td>SQL injection testing on injectable parameters</td><td>SQLi confirmations</td></tr>
+            <tr><td>15</td><td>LFI Testing</td><td>Custom</td><td>Local File Inclusion path traversal checks</td><td>LFI confirmations</td></tr>
+            <tr><td>16</td><td>API Security</td><td>API Intelligence Engine + apisec.py</td><td>Black-box API testing (auth/authz, BOLA, injection) with response-gated confirmation — no spec required</td><td>API findings, promoted vulns</td></tr>
+            <tr><td>17</td><td>Cloud Exposure</td><td>nuclei (custom templates)</td><td>AWS/GCP/Azure misconfiguration detection with weighted scoring</td><td>cloud_findings.jsonl</td></tr>
+            <tr><td>18</td><td>Extended Verification</td><td>interactsh, crlfuzz, jwt_tool, SSTImap, graphw00f, smuggler</td><td>Production-safe confirmation of SSRF/CRLF/JWT/SSTI/GraphQL/smuggling — confirm, never exploit</td><td>extended_findings.jsonl</td></tr>
+            <tr><td>19</td><td>Correlation & Issues</td><td>kaiju_entities, kaiju_issues</td><td>Build entity index (7 types, stable refs), run 8 correlation rules, manage issue lifecycle (INV-1 &amp; INV-2), emit timeline events</td><td>entities.json, issues-state.json, events.jsonl</td></tr>
+            <tr><td>20</td><td>API Deep Discovery</td><td>katana (headless), schema-probe</td><td>Browser-driven endpoint & schema harvest; CDP input-function detection</td><td>api_deep_discovery.jsonl, input_functions.jsonl</td></tr>
+            <tr><td>21</td><td>Subdomain Takeover</td><td>Custom + nuclei</td><td>Dangling CNAME & unclaimed-provider takeover checks</td><td>takeover_findings.jsonl</td></tr>
+            <tr><td>22</td><td>Shodan Correlation</td><td>Shodan InternetDB / API</td><td>External-view correlation, coverage-gap ports, geo map</td><td>shodan_findings.jsonl</td></tr>
+            <tr><td>23</td><td>Internet Intel</td><td>Censys, GreyNoise</td><td>Hosts & services from passive internet-wide scans</td><td>internet_intel_findings.jsonl</td></tr>
+            <tr><td>24</td><td>Advanced / Offensive Verify</td><td>offensive_verify.py</td><td>Differential confirmation: JWT, GraphQL, SSRF, open-redirect, CSWSH, race, proto-pollution</td><td>offensive_findings.jsonl</td></tr>
+            <tr><td>25</td><td>Attack Paths (CAPEC v3.9)</td><td>capec_attack_paths.py</td><td>Chain findings into CAPEC/MITRE kill-chains to crown jewels</td><td>attack_paths.jsonl</td></tr>
+            <tr><td>26</td><td>Response Intel</td><td>arise_nlp, response_intel</td><td>Passive 2xx response scanner — PII, secrets, disclosure, unauth</td><td>response_findings.jsonl</td></tr>
+            <tr><td>27</td><td>Adaptive Loop</td><td>offensive/adaptive_loop.py</td><td>Opt-in closed-loop per-endpoint FSM: observe → classify → mutate → verify</td><td>loop_findings.jsonl</td></tr>
+            <tr><td>28</td><td>AriseAI Analyst</td><td>ai_analyst/</td><td>Autonomous pentester — reasons over EASM evidence, live-verifies top hypotheses</td><td>ai_proven.jsonl, ariseai_pentest_report.md</td></tr>
+            <tr><td>99</td><td>Reporting &amp; Aggregation</td><td>Custom Python</td><td>Aggregate all results, compute final risk scores, emit manifest.json</td><td>Final manifest.json</td></tr>
+        </tbody>
+    </table>
+
+    <h2 id="tools">3. Tools & Dependencies</h2>
+    <div class="grid-2">
+        <div class="card">
+            <h3>Reconnaissance</h3>
+            <table>
+                <tr><td><code>subfinder</code></td><td>Passive subdomain discovery</td></tr>
+                <tr><td><code>puredns</code></td><td>DNS brute-force with massdns</td></tr>
+                <tr><td><code>massdns</code></td><td>High-performance DNS resolver</td></tr>
+                <tr><td><code>dnsx</code></td><td>DNS toolkit (A, AAAA, CNAME)</td></tr>
+                <tr><td><code>haktrails</code></td><td>SecurityTrails API wrapper</td></tr>
+                <tr><td><code>httpx</code></td><td>HTTP probing + tech detection</td></tr>
+                <tr><td><code>naabu</code></td><td>Fast port scanner</td></tr>
+                <tr><td><code>nmap</code></td><td>Service version fingerprinting</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>Crawling & Discovery</h3>
+            <table>
+                <tr><td><code>katana</code></td><td>Active web crawler</td></tr>
+                <tr><td><code>gospider</code></td><td>Go-based web spider</td></tr>
+                <tr><td><code>gau</code></td><td>Passive URL fetcher (Wayback, CC, OTX)</td></tr>
+                <tr><td><code>dirsearch</code></td><td>Directory brute-forcer</td></tr>
+                <tr><td><code>ffuf</code></td><td>Fast web fuzzer</td></tr>
+                <tr><td><code>gf</code></td><td>Grep pattern matcher (params, secrets)</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>Vulnerability Testing</h3>
+            <table>
+                <tr><td><code>nuclei</code></td><td>Template-based vuln scanner</td></tr>
+                <tr><td><code>dalfox</code></td><td>XSS scanner & validator</td></tr>
+                <tr><td><code>sqlmap</code></td><td>SQL injection detection</td></tr>
+                <tr><td><code>trufflehog</code></td><td>Secret/credential scanner</td></tr>
+                <tr><td><code>wafw00f</code></td><td>WAF fingerprinting</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>API Security</h3>
+            <table>
+                <tr><td><code>api_intelligence_engine.py</code></td><td>Black-box API testing engine (auth/authz + injection), no spec required</td></tr>
+                <tr><td><code>apisec.py</code></td><td>Stdlib black-box API scanner (live-verified exploits)</td></tr>
+            </table>
+            <h3>Cloud Recon &amp; Audit</h3>
+            <table>
+                <tr><td><code>cloud_enum</code></td><td>AWS/GCP/Azure bucket enumeration (Phase 2)</td></tr>
+                <tr><td><code>s3scanner</code></td><td>Anonymous S3/GCS/Azure access + object listing (Phase 2)</td></tr>
+                <tr><td><code>prowler</code></td><td>Authenticated CIS/PCI/HIPAA audit (Phase 3, opt-in)</td></tr>
+                <tr><td><code>scoutsuite</code></td><td>Authenticated multi-cloud audit (Phase 3, opt-in)</td></tr>
+            </table>
+            <h3>Extended Verification (Module 18)</h3>
+            <table>
+                <tr><td><code>interactsh</code></td><td>OOB oracle — confirms blind SSRF via callback</td></tr>
+                <tr><td><code>crlfuzz</code></td><td>CRLF header-injection detection</td></tr>
+                <tr><td><code>jwt_tool</code></td><td>JWT weakness — offline secret cracking, alg:none</td></tr>
+                <tr><td><code>SSTImap</code></td><td>Template injection detection (15+ engines)</td></tr>
+                <tr><td><code>graphw00f</code></td><td>GraphQL fingerprint + introspection check</td></tr>
+                <tr><td><code>smuggler</code></td><td>HTTP request smuggling (gated off by default)</td></tr>
+            </table>
+            <h3>Correlation &amp; Intelligence (Module 19)</h3>
+            <table>
+                <tr><td><code>kaiju_entities.py</code></td><td>Entity index (7 types, stable deterministic refs)</td></tr>
+                <tr><td><code>kaiju_issues.py</code></td><td>Issue correlation (6 rules), lifecycle mgmt, timeline events</td></tr>
+                <tr><td><code>ai_probing.py</code></td><td>LLM-powered hypothesis generation for guided testing</td></tr>
+            </table>
+            <h3>Autonomous &amp; Platform</h3>
+            <table>
+                <tr><td><code>arise_autonomous.py</code></td><td>Background watcher (auto-correlate, auto-summarize, Drive sync)</td></tr>
+                <tr><td><code>arise_jobs.py</code></td><td>Scheduled job queue with tool granularity control</td></tr>
+                <tr><td><code>arise_secure.py</code></td><td>Sandboxed autonomous execution + audit logging</td></tr>
+                <tr><td><code>arise_drive.py</code></td><td>Google Drive state sync (retention-exempt first priority)</td></tr>
+                <tr><td><code>Python 3</code></td><td>Orchestrator + dashboard (Flask)</td></tr>
+                <tr><td><code>Bash</code></td><td>Pipeline scripting</td></tr>
+                <tr><td><code>Go tools</code></td><td>subfinder, httpx, nuclei, etc.</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <h2 id="risk-model">4. Risk Scoring Model</h2>
+    <p>ARISE uses a 6-domain composite risk model. Each host gets scored across these domains, clamped to 0–100:</p>
+    <table class="risk-table">
+        <thead><tr><th>Domain</th><th>Weight</th><th>Signals</th></tr></thead>
+        <tbody>
+            <tr><td><span class="badge b-crit">Vulnerability</span></td><td>35</td><td>Nuclei critical/high findings, confirmed SQLi/XSS/LFI</td></tr>
+            <tr><td><span class="badge b-high">Credential / Secret</span></td><td>25</td><td>Exposed API keys, tokens, passwords, service account keys</td></tr>
+            <tr><td><span class="badge b-med">Infrastructure Posture</span></td><td>20</td><td>Missing security headers, open sensitive ports, no WAF</td></tr>
+            <tr><td><span class="badge b-low">SSL / Domain</span></td><td>10</td><td>Dangling CNAMEs, expired certs, missing HSTS</td></tr>
+            <tr><td><span class="badge b-info">Attack Surface Breadth</span></td><td>10</td><td>Total exposed endpoints, subdomains, services</td></tr>
+            <tr><td style="color:var(--aws);font-weight:700">Cloud Exposure</td><td>40</td><td>Public buckets, exposed metadata, Terraform state, open K8s APIs</td></tr>
+        </tbody>
+    </table>
+    <div class="card">
+        <h3>Risk Bands</h3>
+        <table>
+            <tr><td><span class="badge b-crit">Critical</span></td><td>Score &ge; 70</td><td>Immediate remediation required</td></tr>
+            <tr><td><span class="badge b-high">High</span></td><td>Score 50–69</td><td>Prioritize for next sprint</td></tr>
+            <tr><td><span class="badge b-med">Medium</span></td><td>Score 30–49</td><td>Track and plan remediation</td></tr>
+            <tr><td><span class="badge b-low">Low</span></td><td>Score &lt; 30</td><td>Monitor during regular assessments</td></tr>
+        </table>
+        <h3>Port Risk Tiers</h3>
+        <table>
+            <tr><td><span class="badge b-crit">Tier 1 (Critical)</span></td><td>Redis (6379), Elasticsearch (9200/9300), MongoDB (27017), CouchDB (5984), Memcached (11211)</td></tr>
+            <tr><td><span class="badge b-high">Tier 2 (High)</span></td><td>MySQL (3306), PostgreSQL (5432), MSSQL (1433)</td></tr>
+            <tr><td><span class="badge b-med">Tier 3 (Medium)</span></td><td>RDP (3389), SSH (22), Telnet (23), SMB (445), FTP (21), SMTP (25), POP (110), IMAP (143)</td></tr>
+        </table>
+    </div>
+
+    <h2 id="cloud">5. Cloud Exposure Detection</h2>
+    <p>Module 17 is <b>cloud-only</b>. It runs in three phases and scores each finding with a weighted model. App/API vulnerabilities (XSS, SQLi, SSRF, IDOR, JWT) never appear on the Cloud dashboard — a category whitelist keeps them in the Vulns/API tabs.</p>
+    <pre><code>weighted_score = base_weight &times; exploitability &times; exposure</code></pre>
+
+    <div class="card">
+        <h3>Three-phase pipeline</h3>
+        <table>
+            <thead><tr><th>Phase</th><th>What</th><th>Tools</th><th>Auth</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. Detection</b></td><td>Misconfiguration scanning + origin-bypass + leaked creds + email posture</td><td><code>nuclei</code> + custom cloud-templates, <code>dig</code>, <code>trufflehog</code></td><td>None (external)</td></tr>
+                <tr><td><b>2. Storage recon</b></td><td>Enumerate S3/GCS/Azure buckets from the target keyword, then check anonymous access + list objects</td><td><code>cloud_enum</code> &rarr; <code>s3scanner</code></td><td>None (external)</td></tr>
+                <tr><td><b>3. Compliance audit</b></td><td>Account-wide CIS/PCI/HIPAA checks against the cloud APIs</td><td><code>prowler</code> or <code>scoutsuite</code></td><td><b>Requires cloud credentials</b> — OFF by default</td></tr>
+            </tbody>
+        </table>
+        <p style="font-size:13px;color:var(--text-secondary)"><b>Why Phase 3 is gated:</b> Prowler/ScoutSuite scan a cloud account from the inside via authenticated APIs. In an external scan you don't have the target's credentials, so Phase 3 stays off unless the operator sets <code>CLOUD_AUDIT_ENABLED=true</code> and supplies credentials (auditing your own estate, or authorized post-compromise).</p>
+    </div>
+
+    <div class="card">
+        <h3>Cloud dashboard layout</h3>
+        <ul>
+            <li><b>Recon &amp; estate inventory</b> — cloud providers per host (from httpx tech), CDN/edge fronting, exposed origin IPs (direct, not behind CDN), enumerated storage buckets</li>
+            <li><b>Security findings</b> — scored misconfigurations, grouped into <i>security</i> (public storage, K8s, metadata, Terraform state, CI/CD, datastores, origin bypass, debug) and <i>posture</i> (missing WAF, missing SPF/DKIM/DMARC)</li>
+            <li><b>Compliance audit</b> — hidden unless Phase 3 ran; shows failed CIS/PCI checks by service</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Cloud Finding Categories</h3>
+        <table>
+            <thead><tr><th>Category</th><th>Base Weight</th><th>Examples</th></tr></thead>
+            <tbody>
+                <tr><td>metadata_service_exposure</td><td>40</td><td>AWS IMDS, GCP metadata endpoint</td></tr>
+                <tr><td>terraform_state_exposed</td><td>35</td><td>Public .tfstate files with secrets</td></tr>
+                <tr><td>public_kubernetes_api</td><td>35</td><td>Unauthenticated kubelet, K8s API</td></tr>
+                <tr><td>public_cicd</td><td>30</td><td>Exposed Jenkins, GitLab, ArgoCD</td></tr>
+                <tr><td>public_cloud_storage</td><td>25</td><td>Open S3 buckets, GCS buckets, Azure blobs</td></tr>
+                <tr><td>public_elasticsearch</td><td>25</td><td>Unauth Elasticsearch/OpenSearch</td></tr>
+                <tr><td>public_redis_mongo</td><td>25</td><td>Exposed Redis, MongoDB, Memcached</td></tr>
+                <tr><td>grafana_prometheus_exposed</td><td>20</td><td>Public Grafana dashboards, Prometheus metrics</td></tr>
+                <tr><td>debug_endpoint</td><td>20</td><td>Spring Actuator, PHP info, Werkzeug debugger</td></tr>
+                <tr><td>information_disclosure</td><td>10</td><td>Generic config/version leaks</td></tr>
+            </tbody>
+        </table>
+        <h3>Exposure Multiplier</h3>
+        <table>
+            <tr><td>Direct (no WAF/CDN)</td><td>&times; 1.0</td></tr>
+            <tr><td>Behind CDN</td><td>&times; 0.85</td></tr>
+            <tr><td>Behind WAF</td><td>&times; 0.6</td></tr>
+        </table>
+    </div>
+
+    <h2 id="api-security">6. API Security Testing</h2>
+    <div class="card">
+        <h3>API Intelligence Engine (owns auth/authz + black-box)</h3>
+        <ul>
+            <li>Deterministic, no OpenAPI spec required &mdash; probes and classifies every discovered URL (crawl, JS, dirsearch, Module 20 XHR interception).</li>
+            <li>Bundles <code>apisec.py</code> (stdlib black-box scanner) as its verification engine; findings are response-gated to keep false positives low.</li>
+            <li><b>Autoswagger (auth/authz) and RESTler (robustness) were removed.</b> Autoswagger needed a published spec and duplicated the intel engine's auth/authz findings at a higher false-positive rate; RESTler produced ~1 low-value finding per scan. The intel engine + apisec.py now own the entire API surface.</li>
+        </ul>
+    </div>
+
+    <h2 id="extended">6b. Extended Verification (Module 19)</h2>
+    <p>Dedicated FOSS scanners confirm vulnerability classes nuclei structurally can't reach. The module is <b>production-safe by contract</b>: it <b>confirms</b> findings, it never <b>exploits</b> them.</p>
+    <div class="card">
+        <h3>Safe-mode contract (EXTENDED_SAFE_MODE=true)</h3>
+        <ul>
+            <li>No shells, no data exfiltration, no auth-bypass actions, no state mutation</li>
+            <li>GET / read-only requests, benign payloads, rate-limited, URL-capped</li>
+            <li>Confirmation comes from OOB callbacks, response reflection, or offline analysis — never weaponization</li>
+        </ul>
+        <h3>Per-check verification method</h3>
+        <table>
+            <thead><tr><th>Check</th><th>Tool</th><th>How it confirms (safely)</th><th>Confidence</th></tr></thead>
+            <tbody>
+                <tr><td>Blind SSRF</td><td>interactsh</td><td>Injects an OOB URL into SSRF-sink params; a DNS/HTTP callback proves the server made an outbound request. Nothing internal is read.</td><td>Confirmed</td></tr>
+                <tr><td>CRLF</td><td>crlfuzz</td><td>Detects CR/LF reflected into response headers. No XSS/cache-poison chaining.</td><td>Confirmed</td></tr>
+                <tr><td>JWT</td><td>jwt_tool</td><td><b>100% offline.</b> Tokens harvested from responses/JS are decoded and cracked locally against a wordlist. Zero requests sent — no auth bypass possible.</td><td>Confirmed</td></tr>
+                <tr><td>SSTI</td><td>SSTImap</td><td>Arithmetic marker payloads (<code>{{7*7}}</code>) identify a vulnerable engine. Never <code>--os-shell</code>/<code>-X</code>.</td><td>Probable</td></tr>
+                <tr><td>GraphQL</td><td>graphw00f</td><td>Read-only engine fingerprint + introspection state on discovered <code>/graphql</code> endpoints.</td><td>Informational</td></tr>
+                <tr><td>HTTP smuggling</td><td>smuggler</td><td><b>Gated off by default.</b> Desync probes can disturb other users' production traffic — opt-in via <code>CHECK_SMUGGLING=true</code>.</td><td>Probable</td></tr>
+            </tbody>
+        </table>
+        <p style="font-size:13px;color:var(--text-secondary)">Findings land in the <b>Vulns</b> tab with source <code>Extended Verification</code> and a confidence badge (Confirmed / Probable / Info). Output: <code>19_extended_checks/extended_findings.jsonl</code>.</p>
+    </div>
+
+    <h2 id="kaiju">6c. ARISE Correlation Engine (Phases 0-4)</h2>
+    <p>ARISE's correlation engine is the multi-phase entity and issue correlation system that transforms raw pipeline findings into correlated, lifecycle-managed security issues.</p>
+
+    <div class="card">
+        <h3>Phase 0: Entity Index Engine (kaiju_entities.py)</h3>
+        <p><b>Invariant INV-1:</b> Stable, deterministic entity references derived from natural keys.</p>
+        <ul>
+            <li><b>7 Entity Types:</b> domain, subdomain, host (keyed on IP), service, technology, vulnerability, certificate</li>
+            <li><b>Entity Refs:</b> SHA1(natural_key)[:10] — deterministic, byte-identical on recompute</li>
+            <li><b>Relations:</b> 6 types — HAS_SUB, RESOLVES_TO, RUNS, USES, AFFECTS, and implicit entity-to-entity links</li>
+            <li><b>Provenance:</b> Each entity tracks which scanner(s) produced it (nuclei, nmap, trufflehog, etc.)</li>
+            <li><b>Graph Traversal:</b> N-hop related-entity lookup for the entity drawer's Related tab</li>
+            <li><b>Storage:</b> <code>scans/&lt;id&gt;/.derived/entities.json</code> (regenerable, safe to delete)</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Phase 1: Entity Drawer (Global UI Component)</h3>
+        <ul>
+            <li><b>Right slide-over panel</b> — 480px (min 92vw on mobile), opens from any entity reference in the app</li>
+            <li><b>4 Tabs per entity:</b>
+                <ul>
+                    <li><b>Summary</b> — all entity attributes as key/value pairs</li>
+                    <li><b>Related</b> — 1-hop graph neighbors grouped by type, clickable to open their drawer (stack navigation)</li>
+                    <li><b>Issues</b> — all issues affecting this entity</li>
+                    <li><b>Raw</b> — provenance, ref string (monospace), full JSON dump</li>
+                </ul>
+            </li>
+            <li><b>Keyboard:</b> Esc closes, focus trapped while open</li>
+            <li><b>Integrated into:</b> Issue evidence chains, timeline events, related-entity navigation</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Phase 2: Issues Lens (Deep-Linked Landing Page)</h3>
+        <ul>
+            <li><b>Default landing view</b> — issues as primary investigative surface</li>
+            <li><b>Severity filters</b> — clickable chips (Critical, High, Medium, Low) with counts, multi-select capable</li>
+            <li><b>Status filter</b> — dropdown (All / Open / Acknowledged / Resolved / False positive / Accepted risk)</li>
+            <li><b>Sortable by:</b> Risk descending, Severity, Newest</li>
+            <li><b>Issue rows:</b> gradient card with severity stripe, title, status pill, ref, rule name, detection count, risk score</li>
+            <li><b>Click to drawer</b> — opens Issue detail panel</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Phase 3: Issue Lifecycle & Correlation Rules</h3>
+        <p><b>Invariant INV-2:</b> Human-set statuses (false_positive, accepted_risk) survive recompute.</p>
+        <ul>
+            <li><b>8 Correlation Rules (all validated against real data):</b>
+                <ol>
+                    <li><code>exposed-service</code> — sensitive DB/cache ports (3306, 5432, 6379, 27017, etc.) exposed to internet</li>
+                    <li><code>dev-staging-exposed</code> — dev/staging/test subdomains resolving to public IPs</li>
+                    <li><code>missing-headers</code> — web apps missing critical security headers (HSTS, CSP, X-Content-Type-Options)</li>
+                    <li><code>leaked-secret</code> — API keys/credentials found by TruffleHog in JS files</li>
+                    <li><code>hsts-gap</code> — HSTS misconfiguration (missing HTTP&rarr;HTTPS redirect, missing/weak header, no preload) from the dedicated 5-test HSTS audit (<code>tls/hsts_audit.py</code>); catches the no-redirect MITM case that <code>missing-headers</code> can't (it only fires when 2+ of 6 headers are missing)</li>
+                    <li><code>new-asset</code> — subdomains appearing for the first time vs. previous scan</li>
+                    <li><code>no-waf</code> — web applications without WAF protection</li>
+                    <li><code>compounding-risk</code> — the first rule to actually walk the RUNS/RESOLVES_TO/AFFECTS relations for risk computation (not just cosmetic labels): fires when 2+ independent risk factors (exposed sensitive service, confirmed high/critical vuln, no WAF, weak headers) converge on the SAME host, since combined exploitability is materially higher than any one factor alone (e.g. a web vuln becomes a pivot to an exposed DB on the same box)</li>
+                </ol>
+            </li>
+            <li><b>Issue Lifecycle:</b>
+                <ol>
+                    <li>Computed issues matched against <code>issues-state.json</code> by ref</li>
+                    <li>New issues → status=open, detections=1, created event</li>
+                    <li>Re-detected issues → detections+=1, last_seen_rev updated</li>
+                    <li>Open issues not in computed set → status=resolved, auto_resolved event</li>
+                    <li>Human-set statuses NEVER auto-resolved (INV-2)</li>
+                    <li>Orphaned entries (rule removed) → tombstoned with orphaned_at, reattach on recompute</li>
+                </ol>
+            </li>
+            <li><b>Atomic writes:</b> Temp file → os.rename() → .bak backup</li>
+            <li><b>Issue detail drawer:</b> Evidence chain (clickable refs), "Why flagged" (markdown), status change form (requires note for false_positive/accepted_risk), remediation, history</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Phase 4: Timeline &amp; Event Stream</h3>
+        <ul>
+            <li><b>Append-only event log</b> — <code>state/&lt;target&gt;/events.jsonl</code> (retention-exempt, Drive-synced first)</li>
+            <li><b>11 Event kinds:</b> new_subdomain, subdomain_gone, new_ip, ip_gone, port_opened, port_closed, service_changed, new_vuln_match, issue_created, issue_auto_resolved, issue_reopened, issue_status_changed</li>
+            <li><b>Diff summary strip</b> — chips counting events by kind at top of timeline view</li>
+            <li><b>Event rows:</b> kind icon (colored), description with clickable entity labels, revision tag</li>
+            <li><b>Idempotent append:</b> Re-running correlate never duplicates events (verified by test)</li>
+            <li><b>Timeline nav item</b> added to sidebar (between Graph and AI)</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>On-Disk Layout (ARISE Correlation State)</h3>
+        <pre><code>state/&lt;target&gt;/                  ← SACRED. Retention-exempt. Drive-synced first.
+  issues-state.json              ← Stored half (status, first_seen, detections, history)
+  issues-state.json.bak          ← Atomic write backup
+  events.jsonl                   ← Append-only timeline
+
+scans/&lt;id&gt;/.derived/             ← Regenerable cache (safe to delete)
+  entities.json                  ← Entity index (7 types, 6 relation types)
+  field-coverage.json            ← Audit: which fields present in which rules</code></pre>
+    </div>
+
+    <div class="card">
+        <h3>ARISE Correlation API Routes (Added to dashboard.py)</h3>
+        <table>
+            <thead><tr><th>Endpoint</th><th>Method</th><th>Purpose</th></tr></thead>
+            <tbody>
+                <tr><td><code>/api/t/&lt;target&gt;/entities/&lt;ref&gt;</code></td><td>GET</td><td>Single entity by ref + all attributes</td></tr>
+                <tr><td><code>/api/t/&lt;target&gt;/entities/&lt;ref&gt;/related</code></td><td>GET</td><td>N-hop related entities (grouped by type)</td></tr>
+                <tr><td><code>/api/t/&lt;target&gt;/entities/&lt;ref&gt;/issues</code></td><td>GET</td><td>All issues affecting this entity</td></tr>
+                <tr><td><code>/api/t/&lt;target&gt;/issues</code></td><td>GET</td><td>List issues with filters (severity, status, rule, sort)</td></tr>
+                <tr><td><code>/api/t/&lt;target&gt;/issues/&lt;ref&gt;</code></td><td>GET</td><td>Single issue detail (merged compute + state)</td></tr>
+                <tr><td><code>/api/t/&lt;target&gt;/issues/&lt;ref&gt;/status</code></td><td>POST</td><td>Update issue status (note required for false_positive/accepted_risk)</td></tr>
+                <tr><td><code>/api/t/&lt;target&gt;/timeline</code></td><td>GET</td><td>Event stream + diff summary (filterable by kind, limit)</td></tr>
+                <tr><td><code>/api/t/&lt;target&gt;/field-coverage</code></td><td>GET</td><td>Phase-0 field presence audit</td></tr>
+                <tr><td><code>/internal/correlate</code></td><td>POST</td><td>Manual trigger for pipeline hook</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 id="dashboard">7. Dashboard & API Endpoints</h2>
+    <p>The Flask dashboard serves at <code>http://localhost:5000</code> with these views:</p>
+    <div class="grid-2">
+        <div class="card">
+            <h3>Dashboard Views</h3>
+            <ul>
+                <li><b>Issues</b> (new, default) — Correlated findings with severity/status filters, deep-linked lens</li>
+                <li><b>Timeline</b> (new) — Event stream with diff summary, entity-clickable event rows</li>
+                <li><b>Overview</b> — Risk gauge, severity rings, stat cards, tech wordcloud, top risk assets</li>
+                <li><b>Assets</b> — All discovered hosts with WAF, IP, status, risk band</li>
+                <li><b>Vulns</b> — All vulnerability findings across sources</li>
+                <li><b>CVEs</b> — EPSS-prioritized CVE listing</li>
+                <li><b>API</b> — API security findings (Intelligence Engine + apisec.py, deduplicated)</li>
+                <li><b>Cloud</b> — Cloud exposure with AWS/GCP/Azure provider detection</li>
+                <li><b>Ports</b> — Port scan results with service fingerprinting</li>
+                <li><b>Dirs</b> — Directory discovery results</li>
+                <li><b>Changes</b> — Diff between scans (new hosts, resolved, risk delta)</li>
+                <li><b>Pipeline</b> — Module execution status and timing</li>
+                <li><b>Graph</b> — WebGL relationship visualization of entities</li>
+                <li><b>AI</b> — AI analyst + autonomous insights</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>REST API (Core + Correlation)</h3>
+            <table>
+                <tr><td><code>GET /api/statistics</code></td><td>Aggregate stats</td></tr>
+                <tr><td><code>GET /api/risk</code></td><td>Risk score + grade</td></tr>
+                <tr><td><code>GET /api/executive</code></td><td>CXO summary</td></tr>
+                <tr><td><code>GET /api/hosts</code></td><td>All host rows</td></tr>
+                <tr><td><code>GET /api/host/{name}</code></td><td>Host detail</td></tr>
+                <tr><td><code>GET /api/vulnerabilities</code></td><td>All findings</td></tr>
+                <tr><td><code>GET /api/ports</code></td><td>Open ports</td></tr>
+                <tr><td><code>GET /api/services</code></td><td>Nmap fingerprints</td></tr>
+                <tr><td><code>GET /api/cloud</code></td><td>Cloud findings</td></tr>
+                <tr><td><code>GET /api/techstack</code></td><td>Tech detection</td></tr>
+                <tr><td><code>GET /api/cves</code></td><td>CVE listing</td></tr>
+                <tr><td><code>GET /api/api-security</code></td><td>API security (gen-1 &amp; gen-2, deduplicated)</td></tr>
+                <tr><td><code>GET /api/modules</code></td><td>Pipeline status</td></tr>
+                <tr><td><code>GET /api/dirsearch</code></td><td>Dir results</td></tr>
+                <tr><td><code>GET /api/changes</code></td><td>Scan diff</td></tr>
+                <tr><td style="background:var(--accent-dim); font-weight:600"><b>Correlation Routes</b></td><td></td></tr>
+                <tr><td><code>GET /api/t/&lt;target&gt;/issues</code></td><td>Issues with filters</td></tr>
+                <tr><td><code>GET /api/t/&lt;target&gt;/issues/&lt;ref&gt;</code></td><td>Issue detail</td></tr>
+                <tr><td><code>POST /api/t/&lt;target&gt;/issues/&lt;ref&gt;/status</code></td><td>Update status</td></tr>
+                <tr><td><code>GET /api/t/&lt;target&gt;/entities/&lt;ref&gt;</code></td><td>Entity detail</td></tr>
+                <tr><td><code>GET /api/t/&lt;target&gt;/entities/&lt;ref&gt;/related</code></td><td>Related entities</td></tr>
+                <tr><td><code>GET /api/t/&lt;target&gt;/entities/&lt;ref&gt;/issues</code></td><td>Issues for entity</td></tr>
+                <tr><td><code>GET /api/t/&lt;target&gt;/timeline</code></td><td>Event stream</td></tr>
+                <tr><td><code>GET /api/t/&lt;target&gt;/field-coverage</code></td><td>Field audit</td></tr>
+                <tr><td><code>GET /kt</code></td><td>This document</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <h2 id="operations">8. Operations & CLI</h2>
+    <pre><code># Full scan + dashboard
+python3 arise.py
+
+# Dashboard only (browse previous scans)
+python3 arise.py --dashboard-only
+
+# Scan only (no web UI)
+python3 arise.py --no-dashboard
+
+# Custom targets
+python3 arise.py --hosts targets.txt
+
+# Skip modules
+python3 arise.py --skip waf_detection --skip param_fuzzing
+
+# Dry run (preview execution order)
+python3 arise.py --dry-run
+
+# Custom dashboard port
+python3 arise.py --dashboard-port 8080
+
+# Tuning via env vars
+python3 arise.py --env PORT_SCAN_MODE=fast --env NAABU_RATE=5000</code></pre>
+
+    <div class="card">
+        <h3>Scan Directory Layout</h3>
+        <pre><code>scans/{domain}-{DDMMYY}-{HHMM}/
+├── manifest.json                    # Central state store
+├── logs/                            # Per-module execution logs
+├── 01_asset_discovery/              # Subdomain lists
+├── 02_subdomain_enumeration/        # Brute-force results
+├── 03_dns_resolution/               # Resolved IPs
+├── 04_http_discovery/               # http_confirmed.json + tech stack
+│   └── responses/                   # Raw HTTP responses
+├── 05_waf_detection/                # WAF fingerprints
+├── 06_crawling/                     # all_urls.txt
+├── 07_header_analysis/              # Security header scores
+├── 08_service_fingerprint/          # services.json (nmap)
+├── 09_directory_discovery/          # dirsearch results
+├── 10_secret_scanning/              # TruffleHog credential findings
+├── 11_param_fuzzing/                # Discovered parameters
+├── 12_nuclei_scanning/              # Nuclei JSON output
+├── 13_xss_testing/                  # Dalfox results
+├── 14_sqli_testing/                 # SQLmap results
+├── 15_lfi_testing/                  # LFI results
+├── 16_api_security/                 # Intelligence Engine + apisec.py output
+├── 17_cloud_exposure/               # cloud_findings.jsonl
+├── 18_extended_verification/        # extended_findings.jsonl (interactsh, jwt_tool, etc.)
+├── 19_correlation/                  # ARISE correlation outputs
+│   ├── entities.json                # Entity index (regenerable)
+│   └── field-coverage.json          # Field presence audit
+└── .derived/                        # Regenerable cache (safe to delete)
+    ├── entities.json
+    └── field-coverage.json</code></pre>
+    </div>
+
+    <h2 id="tuning">9. Tuning & Configuration</h2>
+    <div class="card">
+        <h3>Pipeline & Scanning</h3>
+        <table>
+            <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>PORT_SCAN_MODE</code></td><td>fast</td><td><code>fast</code> = top 1000 ports, <code>full</code> = all 65535</td></tr>
+                <tr><td><code>NAABU_RATE</code></td><td>1000</td><td>Packets/sec for port scanning</td></tr>
+                <tr><td><code>NUCLEI_THREADS</code></td><td>25</td><td>Parallel nuclei template execution</td></tr>
+                <tr><td><code>HTTPX_THREADS</code></td><td>100</td><td>HTTP probing concurrency</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>API Security</h3>
+        <table>
+            <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>APISEC_AUTH_HEADER</code></td><td>(empty)</td><td>Optional Authorization header value passed to apisec.py for authenticated testing</td></tr>
+                <tr><td><code>APISEC_GEN2_ENABLED</code></td><td>true</td><td>Enable API Intelligence Engine</td></tr>
+                <tr><td><code>API_ENDPOINT_DEDUP</code></td><td>true</td><td>Merge intel-engine + apisec.py findings by (method, path, issue_class)</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Extended Verification (Module 18)</h3>
+        <table>
+            <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>EXTENDED_SAFE_MODE</code></td><td>true</td><td>Safe-mode contract: no shells, no data exfiltration, read-only requests only</td></tr>
+                <tr><td><code>CHECK_SSRF</code></td><td>true</td><td>Enable blind SSRF confirmation via interactsh OOB callbacks</td></tr>
+                <tr><td><code>CHECK_CRLF</code></td><td>true</td><td>Enable CRLF header-injection detection</td></tr>
+                <tr><td><code>CHECK_JWT</code></td><td>true</td><td>Enable JWT offline analysis (100% local, no requests sent)</td></tr>
+                <tr><td><code>CHECK_SSTI</code></td><td>true</td><td>Enable SSTI detection via marker payloads</td></tr>
+                <tr><td><code>CHECK_GRAPHQL</code></td><td>true</td><td>Enable GraphQL fingerprint + introspection check</td></tr>
+                <tr><td><code>CHECK_SMUGGLING</code></td><td>false</td><td>Enable HTTP request smuggling (gated off by default — production risk)</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>ARISE Correlation Engine (Module 19)</h3>
+        <table>
+            <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>KAIJU_ENABLED</code></td><td>true</td><td>Enable entity index + correlation rules + issue lifecycle</td></tr>
+                <tr><td><code>KAIJU_RULES</code></td><td>all</td><td>Comma-separated rule names to enable; <code>all</code> for all 6 rules</td></tr>
+                <tr><td><code>KAIJU_AUTO_CORRELATE</code></td><td>true</td><td>Auto-run correlation after scan completes</td></tr>
+                <tr><td><code>KAIJU_FIELD_AUDIT</code></td><td>true</td><td>Audit field coverage and auto-disable rules with missing data</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Cloud Exposure (Module 17)</h3>
+        <table>
+            <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>CLOUD_BUCKET_ENUM_ENABLED</code></td><td>true</td><td>Phase 2 — external S3/GCS/Azure bucket enumeration</td></tr>
+                <tr><td><code>CLOUD_BUCKET_MUTATIONS</code></td><td>(empty)</td><td>Extra comma-separated keywords for bucket brute-forcing</td></tr>
+                <tr><td><code>CLOUD_AUDIT_ENABLED</code></td><td>false</td><td>Phase 3 master switch — authenticated compliance audit (needs cloud creds)</td></tr>
+                <tr><td><code>CLOUD_AUDIT_PROVIDER</code></td><td>aws</td><td>Provider for Phase 3: <code>aws</code> | <code>gcp</code> | <code>azure</code></td></tr>
+                <tr><td><code>CLOUD_AUDIT_TOOL</code></td><td>prowler</td><td>Audit engine: <code>prowler</code> | <code>scoutsuite</code></td></tr>
+            </tbody>
+        </table>
+        <p style="font-size:13px;color:var(--text-secondary)">Phase 3 also reads standard cloud credential env vars: <code>AWS_ACCESS_KEY_ID</code>/<code>AWS_PROFILE</code>, <code>GOOGLE_APPLICATION_CREDENTIALS</code>, or <code>AZURE_CLIENT_ID</code>/<code>AZURE_SUBSCRIPTION_ID</code>. Without them the audit is skipped even when enabled.</p>
+    </div>
+
+    <div class="card">
+        <h3>Autonomous AI Layer</h3>
+        <table>
+            <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>AUTONOMOUS_MODE</code></td><td>false</td><td>Enable background AI watcher (auto-correlate, auto-summarize, Drive sync)</td></tr>
+                <tr><td><code>AUTONOMOUS_JOBS_ENABLED</code></td><td>false</td><td>Enable scheduled pen-test jobs from job queue</td></tr>
+                <tr><td><code>AUTONOMOUS_SAFETY_CONSTRAINTS</code></td><td>true</td><td>Enforce safety rules (non-destructive, rate-limited, no false positives)</td></tr>
+                <tr><td><code>DRIVE_SYNC_ENABLED</code></td><td>false</td><td>Sync <code>state/</code> (sacred) to Google Drive first priority</td></tr>
+                <tr><td><code>DRIVE_SERVICE_ACCOUNT_FILE</code></td><td>(empty)</td><td>Path to Google Drive service account JSON (required for Drive sync)</td></tr>
+                <tr><td><code>AI_PROBING_ENABLED</code></td><td>false</td><td>Enable LLM-powered hypothesis generation for guided testing</td></tr>
+            </tbody>
+        </table>
+        <p style="font-size:13px;color:var(--text-secondary)"><b>Safety by default:</b> All autonomous actions default OFF. Enable only on trusted infrastructure. Autonomous layer logs all actions to <code>logs/autonomous.log</code>.</p>
+    </div>
+
+    <div style="text-align:center;color:var(--text-faint);margin-top:48px;font-size:12px">
+        ARISE Knowledge Transfer Document &mdash; Generated for internal use
+    </div>
+</div>
+</body>
+</html>

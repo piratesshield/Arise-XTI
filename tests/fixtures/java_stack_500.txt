@@ -1,0 +1,15 @@
+HTTP Status 500 – Internal Server Error
+
+Type Exception Report
+
+Message Request processing failed; nested exception is java.lang.NullPointerException
+
+Exception in thread "http-nio-8080-exec-5" org.springframework.web.util.NestedServletException: Request processing failed; nested exception is java.lang.NullPointerException
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at com.acme.billing.InvoiceController.getInvoice(InvoiceController.java:142)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3823)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: java.lang.NullPointerException
+	at com.acme.billing.InvoiceService.load(InvoiceService.java:67)
+
+Apache Tomcat/9.0.53

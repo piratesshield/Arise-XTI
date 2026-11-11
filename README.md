@@ -61,6 +61,21 @@ ARISE-XTI turns a single domain into a continuously-monitored external attack su
 
 ## ⚡ Quick Start
 
+### 🐳 Docker (fastest — 30 seconds)
+
+```bash
+docker run -d --name arisexti -p 5059:5059 \
+  -v arisexti-scans:/app/scans \
+  -v arisexti-state:/app/state \
+  piratesshield/arisexti:latest
+```
+
+Open **http://localhost:5059** → log in with `admin` / `admin`.
+
+Image: [`piratesshield/arisexti`](https://hub.docker.com/r/piratesshield/arisexti) on Docker Hub.
+
+### 🖥️ Native install
+
 ```bash
 ./setup.sh                                          # one-shot installer (macOS/Linux)
 ./easm-pipeline.sh example.com                      # run a scan
@@ -73,15 +88,91 @@ python3 dashboard.py                                # open http://localhost:5059
 
 ## 🔧 Installation
 
-### Prerequisites
+Pick one of the three paths below.
+
+### Option A — 🐳 Docker (recommended)
+
+The official image on Docker Hub ships every binary (`subfinder`, `nuclei`, `naabu`, `katana`, `dnsx`, `puredns`, `massdns`, `nmap`, Chromium for Playwright, etc.) — no local Go toolchain, no `brew`/`apt`, no PATH fights.
+
+```bash
+# Pull the latest build
+docker pull piratesshield/arisexti:latest
+
+# Run the dashboard (host port 5059)
+docker run -d --name arisexti \
+  -p 5059:5059 \
+  -v arisexti-scans:/app/scans \
+  -v arisexti-state:/app/state \
+  piratesshield/arisexti:latest
+
+# Open http://localhost:5059 (admin / admin)
+docker logs -f arisexti
+```
+
+**With API keys** (recommended — enables AI analyst, Shodan, Censys, etc.):
+
+```bash
+docker run -d --name arisexti \
+  -p 5059:5059 \
+  -v arisexti-scans:/app/scans \
+  -v arisexti-state:/app/state \
+  -e ARISE_ADMIN_PASSWORD='change-me' \
+  -e ARISE_SECRET='<your-fernet-key>' \
+  -e ANTHROPIC_API_KEY='sk-ant-...' \
+  -e SHODAN_API_KEY='...' \
+  -e CENSYS_API_ID='...' -e CENSYS_API_SECRET='...' \
+  piratesshield/arisexti:latest
+```
+
+**Run a scan from the host:**
+
+```bash
+docker exec -it arisexti ./easm-pipeline.sh example.com
+```
+
+**docker-compose:**
+
+```yaml
+# docker-compose.yml
+services:
+  arisexti:
+    image: piratesshield/arisexti:latest
+    container_name: arisexti
+    ports:
+      - "5059:5059"
+    volumes:
+      - arisexti-scans:/app/scans
+      - arisexti-state:/app/state
+    env_file: .env
+    restart: unless-stopped
+
+volumes:
+  arisexti-scans:
+  arisexti-state:
+```
+
+```bash
+docker compose up -d
+```
+
+Image tags:
+| Tag | Purpose |
+|---|---|
+| `piratesshield/arisexti:latest` | Latest stable |
+| `piratesshield/arisexti:v1.0.0` | Pinned release |
+
+→ https://hub.docker.com/r/piratesshield/arisexti
+
+### Option B — 🖥️ Native install (macOS / Linux / WSL)
+
+#### Prerequisites
 
 - **Python 3.10+**
 - **Go 1.21+** (for ProjectDiscovery tools)
 - **Nmap**
 - **libpcap-dev** (for naabu)
-- **macOS / Linux / WSL / Docker**
 
-### Install
+#### Install
 
 ```bash
 git clone https://github.com/piratesshield/Arise-XTI.git ARISE-XTI
@@ -99,10 +190,19 @@ The setup script handles:
 - Playwright/Chromium for headless browser modules (Module 20)
 - macOS extended-attribute cleanup (`com.apple.provenance`)
 
-### Verify (macOS)
+#### Verify (macOS)
 
 ```bash
 ./verify_mac_deps.sh
+```
+
+### Option C — 🏗️ Build the image yourself
+
+```bash
+git clone https://github.com/piratesshield/Arise-XTI.git
+cd Arise-XTI
+docker build -t arisexti:dev .
+docker run -d -p 5059:5059 arisexti:dev
 ```
 
 ---

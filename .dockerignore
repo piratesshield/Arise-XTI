@@ -1,7 +1,7 @@
 # ── ARISE Docker build-context excludes ──────────────────────────────────────
-# CRITICAL: keep scan data (tens of GB) and all secrets OUT of the image + context.
+# Keep scan data, secrets, caches, and dev artifacts OUT of the image.
 
-# Scan data / outputs (20+ GB) — mount as a volume at runtime instead
+# Scan data / outputs — mount as a volume at runtime
 scans/
 outputs/
 logs/
@@ -31,21 +31,31 @@ secrets.enc.json
 # Local Python / node envs
 venv/
 .venv/
+.venv-*/
 env/
 node_modules/
 
-# Docs, design assets, scratch — not needed at runtime
+# Dev / scratch files
 dash-exam/
+screenshots/
 *.fig
-*.png
-*.jpg
-*.jpeg
-*.md
 *.backups.py
 old_filter.txt
 test_filter.js
 filter_manager.js
 qq1.png
-
-# The build artifacts themselves
+apitarget.txt
+dashboard_5000.log
 docker/*.tar
+
+# Docs (README is excluded via *.md below; keep capec_v3.9 data)
+*.md
+!capec_v3.9/**/*.md
+
+# Test fixtures (large snapshot data)
+tests/fixtures/
+tests/ai_evals/
+
+# Roadmap / planning files
+*.ROADMAP.md
+*.RESEARCH.md

@@ -1,0 +1,35 @@
+# ARISE-XTI — AI-Powered Intelligent Attack Surface Management
+# Quick start:   docker compose up -d
+# Dashboard:     http://localhost:5059   (admin / admin)
+# Image:         https://hub.docker.com/r/piratesshield/arisexti
+
+services:
+  arisexti:
+    image: piratesshield/arisexti:latest
+    container_name: arisexti
+    ports:
+      - "5059:5059"
+    volumes:
+      - arisexti-scans:/app/scans
+      - arisexti-state:/app/state
+      - arisexti-logs:/app/logs
+      - arisexti-outputs:/app/outputs
+    env_file:
+      - .env
+    environment:
+      # Fallback defaults — override in .env for anything you actually care about.
+      ARISE_DASHBOARD_HOST: 0.0.0.0
+      ARISE_DASHBOARD_PORT: 5059
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:5059/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  arisexti-scans:
+  arisexti-state:
+  arisexti-logs:
+  arisexti-outputs:

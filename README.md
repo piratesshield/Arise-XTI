@@ -117,7 +117,8 @@ docker run -d --name arisexti \
   -v arisexti-scans:/app/scans \
   -v arisexti-state:/app/state \
   -e ARISE_ADMIN_PASSWORD='change-me' \
-  -e ARISE_SECRET='<your-fernet-key>' \
+  # -e ARISE_MASTER_KEY='<fernet-key>'   # optional — auto-generated on first run
+
   -e ANTHROPIC_API_KEY='sk-ant-...' \
   -e SHODAN_API_KEY='...' \
   -e CENSYS_API_ID='...' -e CENSYS_API_SECRET='...' \
@@ -491,7 +492,7 @@ Send scan summaries to Slack:
 ## 🔑 API Keys & Secrets
 
 All keys are read from environment variables (export in your shell, `.env`, or `~/.zshrc`).
-They can also be pasted into **Settings → API Keys** in the dashboard — the vault is encrypted at rest with `ARISE_SECRET`.
+They can also be pasted into **Settings → API Keys** in the dashboard — the vault is encrypted at rest with a Fernet master key that ARISE-XTI auto-generates on first run (`.arise_master.key`, chmod 600) if you don't supply one.
 
 ### Mandatory
 
@@ -499,7 +500,8 @@ They can also be pasted into **Settings → API Keys** in the dashboard — the 
 |---|---|
 | `ARISE_ADMIN_USER` | Dashboard login username. **Default: `admin`** |
 | `ARISE_ADMIN_PASSWORD` | Dashboard login password. **Default: `admin`** (change before any public deployment). |
-| `ARISE_SECRET` | Fernet key that encrypts the on-disk secrets vault (`secrets.enc.json`). |
+
+> There is **no mandatory secret key** to set up — the Fernet master key for the encrypted vault is auto-generated on first boot. Override it only if you want to.
 
 ### Optional — AI Analyst / Red Team
 
@@ -530,14 +532,17 @@ Each key unlocks the matching dashboard tab without blocking the rest of the pip
 |---|---|
 | `SLACK_WEBHOOK` | One-click scan-summary / finding export to Slack. |
 | `ARISE_DASHBOARD_PORT` | Override default port (`5059`). |
+| `ARISE_MASTER_KEY` | Pin the Fernet key that encrypts the secrets vault. Auto-generated to `.arise_master.key` if unset — only override it when you want to share the same vault across hosts or back it up in a secret manager. Generate with: `python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` |
 
 ### Example `.env`
 
 ```bash
-# --- mandatory ---
+# --- login (defaults shown — change ARISE_ADMIN_PASSWORD before exposing) ---
 ARISE_ADMIN_USER=admin
-ARISE_ADMIN_PASSWORD=strongpassword    # CHANGE before exposing the dashboard
-ARISE_SECRET=$(python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())")
+ARISE_ADMIN_PASSWORD=strongpassword
+
+# --- optional: pin the vault key (auto-generated to .arise_master.key if unset) ---
+# ARISE_MASTER_KEY=<run: python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())">
 
 # --- AI (pick one) ---
 ANTHROPIC_API_KEY=sk-ant-...

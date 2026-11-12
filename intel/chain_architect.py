@@ -55,7 +55,7 @@ autonomous-attack manager:
 
 HARD RULES — a violation makes your entire output worthless, not just one chain wrong:
   - Every hop MUST cite one or more real node ids from the "EVIDENCE GRAPH" section below, using
-    the exact id strings given (e.g. "finding:blog.zepto.com | ssrf | 2c09525489").
+    the exact id strings given (e.g. "finding:blog.acme-delivery.example.com | ssrf | 2c09525489").
   - NEVER invent a host, endpoint, or finding that is not present in the evidence graph you were
     given. The reference bundle is a guide book for REASONING about what attackers generally do
     next — it is not itself evidence that anything exists on this target.

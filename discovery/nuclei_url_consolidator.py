@@ -298,7 +298,7 @@ def _load_confirmed_hosts(scan_dir: Path) -> tuple[Optional[set[str]], set[str]]
 
     Each line in http_hosts.txt is a full URL (scheme included) written by httpx
     with the ACTUAL response scheme — not assumed. So if httpx confirmed
-    https://api.zepto.com and http://legacy.zepto.com, each ends up in the
+    https://api.acme-delivery.example.com and http://legacy.acme-delivery.example.com, each ends up in the
     right bucket."""
     path = scan_dir / HTTPX_CONFIRMED_HOSTS_SOURCE
     if not path.is_file() or path.stat().st_size == 0:

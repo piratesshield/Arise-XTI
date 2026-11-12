@@ -1726,12 +1726,12 @@ def _get_catchall_sig(host: str, sample_url: str):
     fingerprint, so a genuinely-exposed file can be told apart from an SPA
     that serves the same index.html for every path.
 
-    F32 (ARISE_REMEDIATION_ROADMAP.md): x.razorpay.com's "Exposed .svn/entries"
-    and "Exposed config.json" findings both just matched the site's own root
-    page verbatim — a CloudFront/S3 SPA returning identical content for every
-    URL. `Finding.baseline` exists precisely for this (a differential capture)
-    but this check never populated it, so nothing caught the match. Reuses
-    the same catchall detector dns_security_audit.py and
+    F32 (ARISE_REMEDIATION_ROADMAP.md): a CloudFront/S3 SPA site's "Exposed
+    .svn/entries" and "Exposed config.json" findings both just matched the
+    site's own root page verbatim — a SPA returning identical content for
+    every URL. `Finding.baseline` exists precisely for this (a differential
+    capture) but this check never populated it, so nothing caught the match.
+    Reuses the same catchall detector dns_security_audit.py and
     nuclei_url_consolidator.py already rely on, rather than a new heuristic.
     """
     if host in _catchall_sig_cache:

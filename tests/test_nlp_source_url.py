@@ -36,15 +36,15 @@ def main() -> int:
         js = staged / "js_downloads"
         js.mkdir()
         hashed = "d9aa2ab1a695450cea9ff5ad6fca0777.js"
-        src_url = "https://x.razorpay.com/dist/app.3dd936b7.js"
+        src_url = "https://x.acme-payments.example.com/dist/app.3dd936b7.js"
         (js / hashed).write_text('var contact="acmecorporation2021@gmail.com";\n')
         (js / "index.tsv").write_text(f"{src_url}\t{hashed}\n")
 
         twoxx = staged / "http_responses_2xx"
         twoxx.mkdir()
         body_name = "abc123def4567890.txt"
-        body_url = "https://api.razorpay.com/v1/config"
-        (twoxx / body_name).write_text("email: ops@razorpay.com\n")
+        body_url = "https://api.acme-payments.example.com/v1/config"
+        (twoxx / body_name).write_text("email: ops@acme-payments.example.com\n")
         (twoxx / "index.tsv").write_text(f"{body_url}\t{body_name}\n")
 
         rows = nlp.scan_local_files(str(staged), base=str(staged))
@@ -55,14 +55,14 @@ def main() -> int:
               bool(js_rows) and all(r.get("source_url") == src_url for r in js_rows),
               f"got {[r.get('source_url') for r in js_rows]}")
         check("hashed JS file -> real host",
-              bool(js_rows) and all(r.get("host") == "x.razorpay.com" for r in js_rows),
+              bool(js_rows) and all(r.get("host") == "x.acme-payments.example.com" for r in js_rows),
               f"got {[r.get('host') for r in js_rows]}")
 
         body_rows = [r for r in rows if body_name in r.get("file", "")]
         check("staged 2xx body -> real source_url + host",
               bool(body_rows)
               and all(r.get("source_url") == body_url
-                      and r.get("host") == "api.razorpay.com" for r in body_rows),
+                      and r.get("host") == "api.acme-payments.example.com" for r in body_rows),
               f"got {[(r.get('source_url'), r.get('host')) for r in body_rows]}")
 
         check("every finding carries source_url (full coverage)",

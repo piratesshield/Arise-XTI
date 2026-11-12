@@ -3,7 +3,7 @@
 Content-based subdomain deduplication.
 
 The URL inventory frequently contains multiple hostnames serving the same
-application: `admin.zepto.com`, `admin-staging.zepto.com`, `admin-old.zepto.com`
+application: `admin.acme-delivery.example.com`, `admin-staging.acme-delivery.example.com`, `admin-old.acme-delivery.example.com`
 often all return the same `<title>Admin Console</title>` shell with the same
 first few KB of body. Treating them as three distinct trees means:
 
@@ -15,8 +15,8 @@ We cluster hosts by response fingerprint AFTER httpx confirms them, pick a
 canonical member per cluster, and emit:
 
   host_clusters.jsonl — one row per cluster:
-      {canonical: "admin.zepto.com",
-       members: ["admin.zepto.com", "admin-staging.zepto.com", ...],
+      {canonical: "admin.acme-delivery.example.com",
+       members: ["admin.acme-delivery.example.com", "admin-staging.acme-delivery.example.com", ...],
        cluster_size: 3,
        fingerprint: {status, title, body_sha1, body_len}}
 

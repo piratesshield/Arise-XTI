@@ -31,16 +31,16 @@ from history import kaiju_issues  # noqa: E402
 SCANS_DIR = os.path.join(ROOT, "scans")
 OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "attack_chain_v2")
 
-# One target per real-world shape this redesign needs to handle correctly:
-# a large multi-subdomain estate with convergent risk (acme-retail.example.com
-# — synthetic fixture with 7 compounding-risk hosts, cited in
-# ARISE_REMEDIATION_ROADMAP.md P2 item 13), a large modern estate with
-# confirmed critical findings but zero nuclei hits (zepto), and a minimal
-# single-host CDN-fronted target (x.razorpay.com) — the small-graph edge case.
+# One target per shape the redesign needs to handle correctly — all synthetic
+# (RFC 2606 .example.com domains). Local scan dirs are never committed.
+# To regenerate: run scans locally, then re-run this script.
 TARGETS = [
-    "zepto.com-250926-0237",
-    "x.razorpay.com-240926-2121",
+    # large multi-subdomain estate with convergent risk (7 compounding-risk hosts)
     "acme-retail.example.com-170826-1942",
+    # large modern estate with confirmed critical findings but zero nuclei hits
+    "acme-delivery.example.com-250926-0237",
+    # minimal single-host CDN-fronted target (small-graph edge case)
+    "x.acme-payments.example.com-240926-2121",
 ]
 
 
@@ -126,7 +126,7 @@ def main():
         written.append(out_path)
         print(f"wrote {out_path}")
 
-    # Phase 0's own checkpoint: the onequince snapshot must reproduce the
+    # Phase 0's own checkpoint: the acme-retail snapshot must reproduce the
     # exact figure ARISE_REMEDIATION_ROADMAP.md cites as already-verified —
     # if this doesn't hold, the capture itself is wrong and must not be
     # trusted as a regression baseline.

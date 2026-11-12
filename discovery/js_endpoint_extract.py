@@ -178,37 +178,37 @@ def _selftest() -> int:
         staged = Path(tmp) / "js_downloads"
         staged.mkdir()
         (staged / "bundle1.js").write_text(
-            'const a="https://api.razorpay.com/v1/payments";'
-            'const b="https://lumberjack.razorpay.com/track";'
+            'const a="https://api.acme-payments.example.com/v1/payments";'
+            'const b="https://lumberjack.acme-payments.example.com/track";'
             'const c="https://www.google-analytics.com/collect";'
             'const d="https://sentry.io/api/123";'
-            'const e="https://x.razorpay.com/self";'
+            'const e="https://x.acme-payments.example.com/self";'
             'const f="https://evil-unrelated.com/x";'
         )
         (staged / "bundle2.js").write_text(
-            'fetch("https://api.razorpay.com/v1/orders")')
+            'fetch("https://api.acme-payments.example.com/v1/orders")')
         (staged / "index.tsv").write_text(
-            "https://x.razorpay.com/dist/bundle1.abc.js\tbundle1.js\n"
-            "https://x.razorpay.com/dist/bundle2.abc.js\tbundle2.js\n")
+            "https://x.acme-payments.example.com/dist/bundle1.abc.js\tbundle1.js\n"
+            "https://x.acme-payments.example.com/dist/bundle2.abc.js\tbundle2.js\n")
 
-        hosts = extract_referenced_hosts(str(staged), "x.razorpay.com")
+        hosts = extract_referenced_hosts(str(staged), "x.acme-payments.example.com")
         names = {r["host"] for r in hosts}
 
-    assert "api.razorpay.com" in names, f"missed same-org API host: {names}"
-    assert "lumberjack.razorpay.com" in names, f"missed same-org host: {names}"
+    assert "api.acme-payments.example.com" in names, f"missed same-org API host: {names}"
+    assert "lumberjack.acme-payments.example.com" in names, f"missed same-org host: {names}"
     print(f"[1] same-org hosts found: {sorted(names)}  OK")
 
     assert "www.google-analytics.com" not in names, "should exclude known third-party"
     assert "sentry.io" not in names, "should exclude known third-party"
     print("[2] third-party SaaS/CDN hosts excluded  OK")
 
-    assert "x.razorpay.com" not in names, "should exclude the scan target itself"
+    assert "x.acme-payments.example.com" not in names, "should exclude the scan target itself"
     print("[3] scan target excluded from its own results  OK")
 
     assert "evil-unrelated.com" not in names, "should exclude a different organization"
     print("[4] different-organization host excluded (scope discipline)  OK")
 
-    api_rec = next(r for r in hosts if r["host"] == "api.razorpay.com")
+    api_rec = next(r for r in hosts if r["host"] == "api.acme-payments.example.com")
     assert api_rec["occurrences"] == 2, f"expected 2 refs, got {api_rec['occurrences']}"
     print(f"[5] occurrence counting across files: {api_rec['occurrences']}  OK")
 

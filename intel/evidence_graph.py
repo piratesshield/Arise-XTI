@@ -92,7 +92,7 @@ def _finding_label(host: str, kind: str, discriminator: str = "") -> str:
 
 def _norm_host(host: str) -> str:
     """Case-fold every host used as a graph key. Sources vary in casing (some
-    tools emit 'API.zepto.com', manifest.json is consistently lowercase) —
+    tools emit 'API.acme-delivery.example.com', manifest.json is consistently lowercase) —
     without this, the same real host could silently split into two node ids
     that never merge, which would quietly break same-asset grounding for
     exactly the hosts it matters most for. Centralized here rather than
@@ -156,7 +156,7 @@ def _rung_from_confidence(confidence: str, default: str = "L1") -> str:
 
 # ---------------------------------------------------------------------------
 # Per-source normalizers — one per real schema audited against live scan data
-# (zepto.com-250926-0237, x.razorpay.com-240926-2121, acme-retail.example.com-*).
+# (acme-delivery.example.com-*, x.acme-payments.example.com-*, acme-retail.example.com-*).
 # Each returns the number of finding/endpoint nodes it added.
 # ---------------------------------------------------------------------------
 

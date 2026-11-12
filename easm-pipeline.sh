@@ -1651,7 +1651,7 @@ module_http_discovery() {
     # explicit http://host URL) silently upgrades to whichever scheme it
     # prefers and reports ONLY that one result, discarding the other
     # entirely. Verified empirically against a real CloudFront-fronted host:
-    # both a bare "x.razorpay.com" and an explicit "http://x.razorpay.com"
+    # both a bare "x.acme-payments.example.com" and an explicit "http://x.acme-payments.example.com"
     # collapsed to a single https:443 result, silently hiding that port 80
     # was ALSO live (serving a real 301) — a scan-to-scan coin flip on which
     # port gets reported, depending on nothing observable. Explicit
@@ -1697,8 +1697,8 @@ module_http_discovery() {
     # Strips a redundant default port (http:80, https:443): since every httpx
     # target is now explicit host:80/host:443 (see above), httpx's own .url
     # field always carries that literal port back, e.g.
-    # "https://x.razorpay.com:443" — technically correct but a different
-    # string from "https://x.razorpay.com" that every OTHER URL source
+    # "https://x.acme-payments.example.com:443" — technically correct but a different
+    # string from "https://x.acme-payments.example.com" that every OTHER URL source
     # (gau, crawl, gospider, ...) produces, which would silently defeat
     # string-based dedup against them downstream.
     [ -f "$OUTPUT_DIR/04_http_discovery/http_confirmed.json" ] && \

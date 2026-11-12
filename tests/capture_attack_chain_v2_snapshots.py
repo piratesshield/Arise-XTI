@@ -32,15 +32,15 @@ SCANS_DIR = os.path.join(ROOT, "scans")
 OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "attack_chain_v2")
 
 # One target per real-world shape this redesign needs to handle correctly:
-# a large multi-subdomain estate with real convergent risk (onequince — the
-# exact "7 compounding-risk hosts" cited in ARISE_REMEDIATION_ROADMAP.md P2
-# item 13), a large modern estate with confirmed critical findings but zero
-# nuclei hits (zepto), and a minimal single-host CDN-fronted target
-# (x.razorpay.com) — the small-graph edge case.
+# a large multi-subdomain estate with convergent risk (acme-retail.example.com
+# — synthetic fixture with 7 compounding-risk hosts, cited in
+# ARISE_REMEDIATION_ROADMAP.md P2 item 13), a large modern estate with
+# confirmed critical findings but zero nuclei hits (zepto), and a minimal
+# single-host CDN-fronted target (x.razorpay.com) — the small-graph edge case.
 TARGETS = [
     "zepto.com-250926-0237",
     "x.razorpay.com-240926-2121",
-    "onequince.com-170826-1942",
+    "acme-retail.example.com-170826-1942",
 ]
 
 
@@ -130,16 +130,16 @@ def main():
     # exact figure ARISE_REMEDIATION_ROADMAP.md cites as already-verified —
     # if this doesn't hold, the capture itself is wrong and must not be
     # trusted as a regression baseline.
-    onequince_path = os.path.join(OUT_DIR, "onequince.com-170826-1942.json")
-    if os.path.exists(onequince_path):
-        with open(onequince_path) as f:
+    acme_path = os.path.join(OUT_DIR, "acme-retail.example.com-170826-1942.json")
+    if os.path.exists(acme_path):
+        with open(acme_path) as f:
             snap = json.load(f)
         n = len(snap.get("kaiju", {}).get("compounding_risk_hosts", []))
         assert n == 7, (
-            f"onequince.com-170826-1942 compounding-risk count is {n}, expected 7 "
+            f"acme-retail.example.com-170826-1942 compounding-risk count is {n}, expected 7 "
             "(ARISE_REMEDIATION_ROADMAP.md P2 item 13) — capture is not trustworthy "
             "as a regression baseline until this is understood.")
-        print("[checkpoint] onequince.com compounding-risk count == 7 — matches "
+        print("[checkpoint] acme-retail.example.com compounding-risk count == 7 — matches "
               "the roadmap's own verified figure. Capture is trustworthy.")
 
     print(f"\n{len(written)} golden snapshot(s) written to {OUT_DIR}")

@@ -1,9 +1,9 @@
 {
-  "scan_id": "onequince.com-170826-1942",
+  "scan_id": "acme-retail.example.com-170826-1942",
   "capec_v1": {
     "capec_attack_paths.json": {
       "generated_at": "2026-08-17T18:25:05.832907+00:00",
-      "scan_dir": "/Users/apple/Downloads/ARISEv4 2/scans/onequince.com-170826-1942",
+      "scan_dir": "/app/scans/acme-retail.example.com-170826-1942",
       "capec_version": "3.9",
       "capec_patterns_loaded": 559,
       "precede_edges": 172,
@@ -11,22 +11,22 @@
       "findings_mapped": 0,
       "asset_facts": {
         "hosts": [
-          "admin.onequince.com",
-          "api-dev.onequince.com",
-          "api-integ.onequince.com",
-          "api-prod-public.onequince.com",
-          "api-qa.onequince.com",
-          "checkout-dev.onequince.com",
-          "checkout-test.onequince.com",
-          "checkout.onequince.com",
-          "engineering.onequince.com",
-          "enterpriseenrollment.onequince.com",
-          "go.onequince.com",
-          "images.onequince.com",
-          "pre-integ.onequince.com",
-          "static.capig.onequince.com",
-          "storefront-bff-prod.onequince.com",
-          "stream.onequince.com"
+          "admin.acme-retail.example.com",
+          "api-dev.acme-retail.example.com",
+          "api-integ.acme-retail.example.com",
+          "api-prod-public.acme-retail.example.com",
+          "api-qa.acme-retail.example.com",
+          "checkout-dev.acme-retail.example.com",
+          "checkout-test.acme-retail.example.com",
+          "checkout.acme-retail.example.com",
+          "engineering.acme-retail.example.com",
+          "enterpriseenrollment.acme-retail.example.com",
+          "go.acme-retail.example.com",
+          "images.acme-retail.example.com",
+          "pre-integ.acme-retail.example.com",
+          "static.capig.acme-retail.example.com",
+          "storefront-bff-prod.acme-retail.example.com",
+          "stream.acme-retail.example.com"
         ],
         "techs": [
           "amazon cloudfront",
@@ -64,7 +64,7 @@
           "kind": "cloud",
           "score": 93,
           "realized": true,
-          "narrative": "ADFS token-signing cert \u2192 Golden SAML \u2192 impersonate \u2192 bypass MFA \u2014 compromise ADFS / AAD-Connect sync account \u2192 steal token-signing certificate \u2192 forge SAML tokens for any user \u2192 access federated cloud services, bypassing MFA",
+          "narrative": "ADFS token-signing cert → Golden SAML → impersonate → bypass MFA — compromise ADFS / AAD-Connect sync account → steal token-signing certificate → forge SAML tokens for any user → access federated cloud services, bypassing MFA",
           "steps": [
             "compromise ADFS / AAD-Connect sync account",
             "steal token-signing certificate",
@@ -74,7 +74,7 @@
           "entry_seed": [
             "federation_present"
           ],
-          "evidence": "Federation host auth.onequince.com live (Federation host live \u2014 likely ADFS/STS (Golden-SAML + AAD-Connect prerequisite; see cloud attack paths)).",
+          "evidence": "Federation host auth.acme-retail.example.com live (Federation host live — likely ADFS/STS (Golden-SAML + AAD-Connect prerequisite; see cloud attack paths)).",
           "capec": [
             "CAPEC-21",
             "CAPEC-473"
@@ -94,7 +94,7 @@
           "kind": "cloud",
           "score": 83,
           "realized": true,
-          "narrative": "Cloud \u2192 on-prem pivot (VPN / Service Bus / Logic Apps / Hybrid Worker) \u2014 leverage cloud foothold's hybrid connectivity \u2192 reach internal services via VPN gateway / Service Bus relay / Logic Apps / Hybrid Runbook Worker \u2192 re-enter on-prem network ('circle of access')",
+          "narrative": "Cloud → on-prem pivot (VPN / Service Bus / Logic Apps / Hybrid Worker) — leverage cloud foothold's hybrid connectivity → reach internal services via VPN gateway / Service Bus relay / Logic Apps / Hybrid Runbook Worker → re-enter on-prem network ('circle of access')",
           "steps": [
             "leverage cloud foothold's hybrid connectivity",
             "reach internal services via VPN gateway / Service Bus relay / Logic Apps / Hybrid Runbook Worker",
@@ -103,7 +103,7 @@
           "entry_seed": [
             "federation_present"
           ],
-          "evidence": "Federation host auth.onequince.com live (Federation host live \u2014 likely ADFS/STS (Golden-SAML + AAD-Connect prerequisite; see cloud attack paths)).",
+          "evidence": "Federation host auth.acme-retail.example.com live (Federation host live — likely ADFS/STS (Golden-SAML + AAD-Connect prerequisite; see cloud attack paths)).",
           "capec": [
             "CAPEC-107"
           ],
@@ -122,7 +122,7 @@
           "kind": "cloud",
           "score": 65,
           "realized": true,
-          "narrative": "Password spray (low-and-slow) \u2192 cloud / VPN initial access \u2014 enumerate valid users from OSINT/SaaS footprint \u2192 low-and-slow spray common passwords against cloud auth \u2192 obtain a valid session, bypass lockout",
+          "narrative": "Password spray (low-and-slow) → cloud / VPN initial access — enumerate valid users from OSINT/SaaS footprint → low-and-slow spray common passwords against cloud auth → obtain a valid session, bypass lockout",
           "steps": [
             "enumerate valid users from OSINT/SaaS footprint",
             "low-and-slow spray common passwords against cloud auth",
@@ -132,7 +132,7 @@
             "federation_present",
             "mail_provider"
           ],
-          "evidence": "Federation host auth.onequince.com live (Federation host live \u2014 likely ADFS/STS (Golden-SAML + AAD-Connect prerequisite; see cloud attack paths)).; mail provider: google",
+          "evidence": "Federation host auth.acme-retail.example.com live (Federation host live — likely ADFS/STS (Golden-SAML + AAD-Connect prerequisite; see cloud attack paths)).; mail provider: google",
           "capec": [
             "CAPEC-49",
             "CAPEC-565"
@@ -152,7 +152,7 @@
       "nodes": [
         {
           "type": "target",
-          "label": "admin.onequince.com,api-dev.onequince.com,api-integ.onequinc",
+          "label": "admin.acme-retail.example.com,api-dev.acme-retail.example.com,api-integ.acme-retail.example",
           "attrs": {}
         }
       ],
@@ -171,21 +171,21 @@
     "path_severities": {},
     "entry_point_count": 15,
     "entry_point_hosts": [
-      "api-dev.onequince.com",
-      "enterpriseregistration.onequince.com",
-      "checkout-dev.onequince.com",
-      "checkout-test.onequince.com",
-      "ts.onequince.com",
-      "capig.onequince.com",
-      "checkout.onequince.com",
-      "images.onequince.com",
-      "pre-integ.onequince.com",
-      "static.capig.onequince.com",
-      "admin.onequince.com",
-      "api-integ.onequince.com",
-      "engineering.onequince.com",
-      "api-qa.onequince.com",
-      "api-prod-public.onequince.com"
+      "api-dev.acme-retail.example.com",
+      "enterpriseregistration.acme-retail.example.com",
+      "checkout-dev.acme-retail.example.com",
+      "checkout-test.acme-retail.example.com",
+      "ts.acme-retail.example.com",
+      "capig.acme-retail.example.com",
+      "checkout.acme-retail.example.com",
+      "images.acme-retail.example.com",
+      "pre-integ.acme-retail.example.com",
+      "static.capig.acme-retail.example.com",
+      "admin.acme-retail.example.com",
+      "api-integ.acme-retail.example.com",
+      "engineering.acme-retail.example.com",
+      "api-qa.acme-retail.example.com",
+      "api-prod-public.acme-retail.example.com"
     ],
     "org_score": null,
     "grade": null

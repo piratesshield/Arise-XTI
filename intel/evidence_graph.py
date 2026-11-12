@@ -156,7 +156,7 @@ def _rung_from_confidence(confidence: str, default: str = "L1") -> str:
 
 # ---------------------------------------------------------------------------
 # Per-source normalizers — one per real schema audited against live scan data
-# (zepto.com-250926-0237, x.razorpay.com-240926-2121, onequince.com-*).
+# (zepto.com-250926-0237, x.razorpay.com-240926-2121, acme-retail.example.com-*).
 # Each returns the number of finding/endpoint nodes it added.
 # ---------------------------------------------------------------------------
 

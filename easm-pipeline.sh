@@ -32,10 +32,15 @@ SCAN_MODE="full"
 
 # Port Scanning Configuration
 # Options: "fast" (top 1000 ports), "full" (all 65535 ports)
-# Default: always scan all 65535 ports; macOS uses lower thread/rate limits
+# Default: always scan all 65535 ports; macOS and Docker use lower limits
+_in_container() { [ -f /.dockerenv ] || grep -qsE '/docker/|/lxc/' /proc/1/cgroup 2>/dev/null; }
 if [ "$(uname -s)" = "Darwin" ]; then
     PORT_SCAN_MODE="${PORT_SCAN_MODE:-full}"
     NAABU_RATE="${NAABU_RATE:-1000}"
+    NAABU_THREADS="${NAABU_THREADS:-25}"
+elif _in_container; then
+    PORT_SCAN_MODE="${PORT_SCAN_MODE:-full}"
+    NAABU_RATE="${NAABU_RATE:-1500}"
     NAABU_THREADS="${NAABU_THREADS:-25}"
 else
     PORT_SCAN_MODE="${PORT_SCAN_MODE:-full}"
@@ -6520,12 +6525,16 @@ EOF
     local -a port_args=(-p -)
     log_info "Scanning all 65,535 ports on all resolved hosts..."
 
-    # Cap threads on macOS to avoid pthread_create crashes
+    # Cap threads on macOS / Docker to avoid pthread_create crashes
     local naabu_threads="$NAABU_THREADS"
     local naabu_rate="$NAABU_RATE"
     if [ "$(uname -s)" = "Darwin" ] && [ "$naabu_threads" -gt 25 ] 2>/dev/null; then
         log_warn "macOS detected: capping naabu threads to 25 (was $naabu_threads) to avoid thread limit crashes"
         naabu_threads=25
+    elif _in_container && [ "$naabu_threads" -gt 25 ] 2>/dev/null; then
+        log_warn "Container detected: capping naabu threads to 25 (was $naabu_threads) to avoid resource exhaustion"
+        naabu_threads=25
+        [ "$naabu_rate" -gt 1500 ] 2>/dev/null && naabu_rate=1500
     fi
 
     # naabu -exclude-cdn REMOVED. We want naabu to scan EVERY host and tag
@@ -6548,17 +6557,25 @@ EOF
     log_info "Running naabu port scan on origin hosts only..."
     _run_naabu "$naabu_threads" "$naabu_rate" "${port_args[@]}"
 
-    # Crash detection + retry with reduced settings
+    # Crash detection + retry with reduced settings.
+    # Catches explicit thread/cgo crashes AND silent failures (empty output in
+    # resource-constrained containers where naabu exits 0 but writes nothing).
     local naabu_crashed=false
     if [ ! -s "$OUTPUT_DIR/14_port_scan/all_ports.jsonl" ]; then
-        if grep -qE 'pthread_create failed|SIGABRT|runtime/cgo' "$OUTPUT_DIR/14_port_scan/naabu.stderr" 2>/dev/null; then
+        local _crash_reason=""
+        if grep -qE 'pthread_create failed|SIGABRT|runtime/cgo|cannot allocate memory|killed' "$OUTPUT_DIR/14_port_scan/naabu.stderr" 2>/dev/null; then
+            _crash_reason="thread/memory limit exceeded"
+        elif [ "$origin_count" -gt 0 ]; then
+            _crash_reason="empty output despite $origin_count target(s) — likely resource exhaustion"
+        fi
+        if [ -n "$_crash_reason" ]; then
             naabu_crashed=true
-            log_error "naabu crashed (thread limit exceeded). Retrying with reduced settings..."
+            log_error "naabu failed ($_crash_reason). Retrying with reduced settings..."
             local retry_threads=$(( naabu_threads / 2 ))
             [ "$retry_threads" -lt 5 ] && retry_threads=5
             local retry_rate=$(( naabu_rate / 2 ))
             [ "$retry_rate" -lt 200 ] && retry_rate=200
-            mv "$OUTPUT_DIR/14_port_scan/naabu.stderr" "$OUTPUT_DIR/14_port_scan/naabu_crash.stderr"
+            mv "$OUTPUT_DIR/14_port_scan/naabu.stderr" "$OUTPUT_DIR/14_port_scan/naabu_crash.stderr" 2>/dev/null
             _run_naabu "$retry_threads" "$retry_rate" -top-ports 1000
             if [ -s "$OUTPUT_DIR/14_port_scan/all_ports.jsonl" ]; then
                 log_info "Retry succeeded with threads=$retry_threads rate=$retry_rate"
